@@ -2,9 +2,7 @@ package ru.yandex.practicum.filmorate.controllers;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.exceptions.InvalidBirthdayException;
-import ru.yandex.practicum.filmorate.exceptions.InvalidEmailException;
-import ru.yandex.practicum.filmorate.exceptions.InvalidLoginException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -47,7 +45,7 @@ class UserControllerTest {
     @Test
     void createWithInvalidEmailException() {
         user.setEmail("Santa");
-        final InvalidEmailException exception = assertThrows(InvalidEmailException.class,
+        final ValidationException exception = assertThrows(ValidationException.class,
                 () -> controller.create(user));
         assertEquals("Адрес электронной почты введен не в верном формате.", exception.getMessage());
     }
@@ -55,7 +53,7 @@ class UserControllerTest {
     @Test
     void createWithInvalidLoginException() {
         user.setLogin(null);
-        final InvalidLoginException exception = assertThrows(InvalidLoginException.class,
+        final ValidationException exception = assertThrows(ValidationException.class,
                 () -> controller.create(user));
         assertEquals("Логин введен в неверном формате.", exception.getMessage());
     }
@@ -63,7 +61,7 @@ class UserControllerTest {
     @Test
     void createWithInvalidBirthdayException() {
         user.setBirthday(LocalDate.of(2024, 1, 1));
-        final InvalidBirthdayException exception = assertThrows(InvalidBirthdayException.class,
+        final ValidationException exception = assertThrows(ValidationException.class,
                 () -> controller.create(user));
         assertEquals("Дата рождения не может дальше сегодняшнего дня.", exception.getMessage());
     }
@@ -103,7 +101,7 @@ class UserControllerTest {
                 .build();
 
         controller.create(user);
-        final InvalidEmailException exception = assertThrows(InvalidEmailException.class,
+        final ValidationException exception = assertThrows(ValidationException.class,
                 () -> controller.updateOrCreate(user1));
         assertEquals("Адрес электронной почты введен не в верном формате.", exception.getMessage());
     }
@@ -119,7 +117,7 @@ class UserControllerTest {
                 .build();
 
         controller.create(user);
-        final InvalidLoginException exception = assertThrows(InvalidLoginException.class,
+        final ValidationException exception = assertThrows(ValidationException.class,
                 () -> controller.updateOrCreate(user1));
         assertEquals("Логин введен в неверном формате.", exception.getMessage());
     }
@@ -135,7 +133,7 @@ class UserControllerTest {
                 .build();
 
         controller.create(user);
-        final InvalidBirthdayException exception = assertThrows(InvalidBirthdayException.class,
+        final ValidationException exception = assertThrows(ValidationException.class,
                 () -> controller.updateOrCreate(user1));
         assertEquals("Дата рождения не может дальше сегодняшнего дня.", exception.getMessage());
     }

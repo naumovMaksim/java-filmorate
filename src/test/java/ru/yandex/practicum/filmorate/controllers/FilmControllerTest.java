@@ -45,7 +45,7 @@ class FilmControllerTest {
     @Test
     void createWithInvalidNameException() {
         film.setName(null);
-        final InvalidNameException exception = assertThrows(InvalidNameException.class,
+        final ValidationException exception = assertThrows(ValidationException.class,
                 () -> controller.create(film));
         assertEquals("Название не может быть пустым.", exception.getMessage());
     }
@@ -55,7 +55,7 @@ class FilmControllerTest {
         film.setDescription("                                                                                        " +
                 "                                                                                                    " +
                 "                                                                                                    ");
-        final InvalidDescriptionException exception = assertThrows(InvalidDescriptionException.class,
+        final ValidationException exception = assertThrows(ValidationException.class,
                 () -> controller.create(film));
         assertEquals("Максимальная длина описания — 200 символов.", exception.getMessage());
     }
@@ -63,7 +63,7 @@ class FilmControllerTest {
     @Test
     void createWithInvalidReleaseDateException() {
         film.setReleaseDate(LocalDate.of(1895, 1, 1));
-        final InvalidReleaseDateException exception = assertThrows(InvalidReleaseDateException.class,
+        final ValidationException exception = assertThrows(ValidationException.class,
                 () -> controller.create(film));
         assertEquals("Дата релиза — не раньше 28.12.1895.", exception.getMessage());
     }
@@ -71,7 +71,7 @@ class FilmControllerTest {
     @Test
     void createWithInvalidDurationException() {
         film.setDuration(0);
-        final InvalidDurationException exception = assertThrows(InvalidDurationException.class,
+        final ValidationException exception = assertThrows(ValidationException.class,
                 () -> controller.create(film));
         assertEquals("Продолжительность фильма должна быть положительной.", exception.getMessage());
     }
@@ -102,7 +102,7 @@ class FilmControllerTest {
                 .build();
 
         controller.create(film);
-        final InvalidNameException exception = assertThrows(InvalidNameException.class,
+        final ValidationException exception = assertThrows(ValidationException.class,
                 () -> controller.updateOrCreate(film1));
         assertEquals("Название не может быть пустым.", exception.getMessage());
     }
@@ -120,7 +120,7 @@ class FilmControllerTest {
                 .build();
 
         controller.create(film);
-        final InvalidDescriptionException exception = assertThrows(InvalidDescriptionException.class,
+        final ValidationException exception = assertThrows(ValidationException.class,
                 () -> controller.updateOrCreate(film1));
         assertEquals("Максимальная длина описания — 200 символов.", exception.getMessage());
     }
@@ -136,7 +136,7 @@ class FilmControllerTest {
                 .build();
 
         controller.create(film);
-        final InvalidReleaseDateException exception = assertThrows(InvalidReleaseDateException.class,
+        final ValidationException exception = assertThrows(ValidationException.class,
                 () -> controller.updateOrCreate(film1));
         assertEquals("Дата релиза — не раньше 28.12.1895.", exception.getMessage());
     }
@@ -152,7 +152,7 @@ class FilmControllerTest {
                 .build();
 
         controller.create(film);
-        final InvalidDurationException exception = assertThrows(InvalidDurationException.class,
+        final ValidationException exception = assertThrows(ValidationException.class,
                 () -> controller.updateOrCreate(film1));
         assertEquals("Продолжительность фильма должна быть положительной.", exception.getMessage());
     }
