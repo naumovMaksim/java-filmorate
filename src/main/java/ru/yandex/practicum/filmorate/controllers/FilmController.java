@@ -20,30 +20,30 @@ public class FilmController {
 
     @GetMapping
     public Collection<Film> findAll() {
-        log.debug("Получен /GET запрос.");
+        log.debug("Получен /GET запрос на получение списка всех фильмов.");
         log.debug("Ответ отправлен: {}", films.values());
         return films.values();
     }
 
     @PostMapping
     public Film create(@RequestBody Film film) {
-        log.debug("Получен /POST запрос: {}", film);
+        log.debug("Получен /POST запрос на добавление нового фильма : {}", film);
         validator.validate(film);
         film.setId(generateId());
-        log.debug("Добавление нового фильма: {}.", film);
         films.put(film.getId(), film);
+        log.debug("Фильм добавлен: {}", films.containsValue(film));
         return film;
     }
 
     @PutMapping
     public Film updateOrCreate(@RequestBody Film film) {
-        log.debug("Получен /PUT запрос: {}", film);
+        log.debug("Получен /PUT запрос на изменение данных фильма: {}", film);
         if (!films.containsKey(film.getId())) {
             throw new ValidationException("Фильм не найден");
         }
         validator.validate(film);
-        log.debug("Изменение данных фильма с {}, на {}.", films.get(film.getId()), film);
         films.put(film.getId(), film);
+        log.debug("Данные фильма изменены: {}", films.containsValue(film));
         return film;
     }
 

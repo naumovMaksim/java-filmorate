@@ -21,27 +21,27 @@ public class UserController {
 
     @GetMapping
     public Collection<User> findAll() {
-        log.debug("Пришел /GET запрос.");
+        log.debug("Пришел /GET запрос на получение всех пользователей.");
         log.debug("Ответ отправлен: {}", users.values());
         return users.values();
     }
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        log.debug("Получен /POST запрос: {}", user);
+        log.debug("Получен /POST на добавление пользователя запрос: {}", user);
         validator.validate(user);
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
         user.setId(generateId());
-        log.debug("Добавление пользователя: {}", user);
         users.put(user.getId(), user);
+        log.debug("Пользователь добавлен: {}", users.containsValue(user));
         return user;
     }
 
     @PutMapping
     public User updateOrCreate(@Valid @RequestBody User user) {
-        log.debug("Получен /PUT запрос: {}", user);
+        log.debug("Получен /PUT запрос на из мнение данных пользователя: {}", user);
         if (!users.containsKey(user.getId())) {
             throw new ValidationException("Пользователь не найден.");
         }
@@ -49,8 +49,8 @@ public class UserController {
             user.setName(user.getLogin());
         }
         validator.validate(user);
-        log.debug("Изменение данных пользователя c: {}, на: {}.", users.get(user.getId()), user);
         users.put(user.getId(), user);
+        log.debug("Пользователь добавлен: {}", users.containsValue(user));
         return user;
     }
 
