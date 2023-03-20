@@ -1,61 +1,86 @@
 package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.validators.UserValidator;
+import ru.yandex.practicum.filmorate.service.user.UserService;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import javax.validation.Valid;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
-    private final UserValidator validator = new UserValidator();
-    private int generatorId;
-    private final Map<Integer, User> users = new HashMap<>();
+    UserStorage userStorage;
+    UserService userService;
+
+    @Autowired
+    public UserController(UserStorage userStorage, UserService userService) {
+        this.userStorage = userStorage;
+        this.userService = userService;
+    }
+
+    @GetMapping("/{id}")
+    public User findUser(@PathVariable int id) {
+        log.debug("Пришел /GET запрос на получение пользователя с id: {}", id);
+        log.debug("Ответ отправлен: {}", userStorage.findUser(id));
+        return userStorage.findUser(id);
+    }
 
     @GetMapping
     public Collection<User> findAll() {
         log.debug("Пришел /GET запрос на получение всех пользователей.");
-        log.debug("Ответ отправлен: {}", users.values());
-        return users.values();
+        log.debug("Ответ отправлен: {}", userStorage.findAll());
+        return userStorage.findAll();
     }
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        log.debug("Получен /POST на добавление пользователя запрос: {}", user);
-        validator.validate(user);
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        user.setId(generateId());
-        users.put(user.getId(), user);
-        log.debug("Пользователь добавлен: {}", users.containsValue(user));
+        log.debug("Пришел /POST на добавление пользователя запрос: {}", user);
+        userStorage.create(user);
+        log.debug("Пользователь добавлен: {}", userStorage.findAll().contains(user));
         return user;
     }
 
     @PutMapping
     public User updateOrCreate(@Valid @RequestBody User user) {
-        log.debug("Получен /PUT запрос на из мнение данных пользователя: {}", user);
-        if (!users.containsKey(user.getId())) {
-            throw new ValidationException("Пользователь не найден.");
-        }
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        validator.validate(user);
-        users.put(user.getId(), user);
-        log.debug("Пользователь добавлен: {}", users.containsValue(user));
+        log.debug("Пришел /PUT запрос на из мнение данных пользователя: {}", user);
+        userStorage.update(user);
+        log.debug("Пользователь добавлен: {}", userStorage.findAll().contains(user));
         return user;
     }
 
-    private int generateId() {
-        return ++generatorId;
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable int id, @PathVariable int friendId) {
+        log.debug("Пришел /POST запрос на добавление друга с id: {} к пользователю с id: {}", friendId, id);
+        userService.addFriend(id, friendId);
+        User addingUser = userStorage.findUser(id);
+        log.debug("Друг c id: {} добавлен: {}", friendId, addingUser.getFriends());
+    }
+
+    @DeleteMapping("{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable int id, @PathVariable int friendId) {
+        log.debug("Пришел /DELETE запрос на удаление друга с id {} у пользователя с id {}", friendId, id);
+        userService.deleteFriend(id, friendId);
+        User addingUser = userStorage.findUser(id);
+        log.debug("Друг с id: {} удален: {}", friendId, addingUser.getFriends());
+    }
+
+    @GetMapping("/{id}/friends")
+    public Collection<User> getFriendsByUserId(@PathVariable int id) {
+        log.debug("Пришел /GET запрос на получение списка друзей пользователя с id {}", id);
+        log.debug("Ответ отправлен: {}", userService.getFriendsByUserId(id));
+        return userService.getFriendsByUserId(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public Collection<User> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
+        log.debug("Пришел /GET запрос на получение списка общих друзей пользователя с id {} и пользователя с id {}", id, otherId);
+        log.debug("Ответ отправлен: {}", userService.getCommonFriends(id, otherId));
+        return userService.getCommonFriends(id, otherId);
     }
 }
 // Строки в Json для проверки программы.

@@ -1,9 +1,9 @@
 package ru.yandex.practicum.filmorate.exceptions;
 
-public class ValidationException extends RuntimeException {
+public class NullException extends RuntimeException {
     private final String parameter;
 
-    public ValidationException(String parameter) {
+    public NullException(String parameter) {
         this.parameter = parameter;
     }
 
