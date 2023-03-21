@@ -30,7 +30,7 @@ public class User {
     private LocalDate birthday;
     private Set<Integer> friends = new HashSet<>();
 
-    public User(int id, @Valid String email, @Valid String login, String name, @Valid LocalDate birthday) {
+    public User(@Valid int id, @Valid String email, @Valid String login, String name, @Valid LocalDate birthday) {
         this.id = id;
         this.email = email;
         this.login = login;

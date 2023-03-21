@@ -1,19 +1,17 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exceptions.NullException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.validators.UserValidator;
 
-import javax.validation.Valid;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 @Component
+@Slf4j
 public class InMemoryUserStorage implements UserStorage {
     private final UserValidator validator = new UserValidator();
     private int generatorId;
@@ -22,7 +20,8 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User findUser(int id) {
         if (!users.containsKey(id)) {
-            throw new NullException("Такого пользователя нет.");
+            log.error("Пользователь не найден.");
+            throw new NullException("Пользователь не найден.");
         }
         return users.get(id);
     }
@@ -46,6 +45,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User update(User user) {
         if (!users.containsKey(user.getId())) {
+            log.error("Пользователь не найден.");
             throw new NullException("Пользователь не найден.");
         }
         if (user.getName() == null || user.getName().isBlank()) {
