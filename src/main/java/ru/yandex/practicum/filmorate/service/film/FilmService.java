@@ -52,4 +52,20 @@ public class FilmService {
                 .limit(count)
                 .collect(Collectors.toList());
     }
+
+    public Film findFilm(int id) {
+        return filmStorage.findFilm(id);
+    }
+
+    public Collection<Film> findAll() {
+        return filmStorage.findAll();
+    }
+
+    public Film create(Film film) {
+        return filmStorage.create(film);
+    }
+
+    public Film updateFilm(Film film) {
+        return filmStorage.update(film);
+    }
 }

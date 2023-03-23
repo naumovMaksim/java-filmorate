@@ -22,7 +22,7 @@ class FilmControllerTest {
     InMemoryFilmStorage inMemoryFilmStorage = new InMemoryFilmStorage();
     InMemoryUserStorage inMemoryUserStorage = new InMemoryUserStorage();
     FilmService filmService = new FilmService(inMemoryFilmStorage, inMemoryUserStorage);
-    FilmController controller = new FilmController(inMemoryFilmStorage, filmService);
+    FilmController controller = new FilmController(filmService);
 
     @BeforeEach
     void beforeEach() {
@@ -42,6 +42,21 @@ class FilmControllerTest {
                 .birthday(LocalDate.of(0, Month.DECEMBER, 6))
                 .friends(new HashSet<>())
                 .build();
+    }
+
+    @Test
+    void findFilm() {
+        controller.create(film);
+        assertEquals(film, controller.findFilm(film.getId()));
+    }
+
+    @Test
+    void findFilmWithWrongData() {
+        controller.create(film);
+        assertEquals(film, controller.findFilm(film.getId()));
+        final DataNotFoundException exception = assertThrows(DataNotFoundException.class,
+                () -> controller.findFilm(0));
+        assertEquals("Фильм не найден.", exception.getParameter());
     }
 
     @Test

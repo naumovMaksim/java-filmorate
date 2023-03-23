@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.DataNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -10,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
+@Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
     private final FilmValidator validator = new FilmValidator();
     private int generatorId;
@@ -21,6 +23,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     public Film findFilm(int id) {
         if (!films.containsKey(id)) {
+            log.error("Фильм не найден.");
             throw new DataNotFoundException("Фильм не найден.");
         }
         return films.get(id);
@@ -35,6 +38,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     public Film update(Film film) {
         if (!films.containsKey(film.getId())) {
+            log.error("Фильм не найден.");
             throw new DataNotFoundException("Фильм не найден");
         }
         validator.validate(film);

@@ -64,4 +64,20 @@ public class UserService {
         }
         return commonFriends;
     }
+
+    public User findUser(int id) {
+        return userStorage.findUser(id);
+    }
+
+    public Collection<User> findAll() {
+        return userStorage.findAll();
+    }
+
+    public User create(User user) {
+        return userStorage.create(user);
+    }
+
+    public User updateUser(User user) {
+        return userStorage.update(user);
+    }
 }
