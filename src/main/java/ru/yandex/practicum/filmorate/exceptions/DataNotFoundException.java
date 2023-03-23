@@ -1,9 +1,9 @@
 package ru.yandex.practicum.filmorate.exceptions;
 
-public class ValidationException extends RuntimeException {
+public class DataNotFoundException extends RuntimeException {
     private final String parameter;
 
-    public ValidationException(String parameter) {
+    public DataNotFoundException(String parameter) {
         this.parameter = parameter;
     }
 
