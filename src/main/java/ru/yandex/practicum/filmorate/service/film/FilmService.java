@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service.film;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
@@ -14,9 +15,10 @@ import java.util.stream.Collectors;
 
 
 @Service
+@Slf4j
 public class FilmService {
-    FilmStorage filmStorage;
-    UserStorage userStorage;
+    private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
 
     @Autowired
     public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
@@ -28,6 +30,7 @@ public class FilmService {
         Film film = filmStorage.findFilm(filmId);
         User user = userStorage.findUser(userId);
         if (film.getUsersLikes().contains(userId)) {
+            log.error("Нельзя поставить лайк фильму дважды.");
             throw new ValidationException("Нельзя поставить лайк фильму дважды.");
         }
         film.setUsersLikes(user);
@@ -37,6 +40,7 @@ public class FilmService {
         Film film = filmStorage.findFilm(filmId);
         User user = userStorage.findUser(userId);
         if (!film.getUsersLikes().contains(userId)) {
+            log.error("Вы уже убрали лайк или еще не поставили его.");
             throw new ValidationException("Вы уже убрали лайк или еще не поставили его.");
         }
         film.deleteUsersLikes(user);

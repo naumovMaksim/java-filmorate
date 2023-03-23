@@ -13,8 +13,8 @@ import java.util.Collection;
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
-    FilmStorage filmStorage;
-    FilmService filmService;
+    private final FilmStorage filmStorage;
+    private final FilmService filmService;
 
     @Autowired
     public FilmController(FilmStorage filmStorage, FilmService filmService) {
@@ -25,8 +25,9 @@ public class FilmController {
     @GetMapping("/{filmId}")
     public Film findFilm(@PathVariable int filmId) {
         log.debug("Пришел запрос на получение фильма по id: {}", filmId);
-        log.debug("Ответ отправлен: {}", filmStorage.findFilm(filmId));
-        return filmStorage.findFilm(filmId);
+        Film film = filmStorage.findFilm(filmId);
+        log.debug("Ответ отправлен: {}", film);
+        return film;
     }
 
     @GetMapping
@@ -47,9 +48,9 @@ public class FilmController {
     @PutMapping
     public Film updateOrCreate(@RequestBody Film film) {
         log.debug("Получен /PUT запрос на изменение данных фильма: {}", film);
-        filmStorage.update(film);
-        log.debug("Данные фильма изменены: {}", filmStorage.findAll().contains(film));
-        return film;
+        Film film1 = filmStorage.update(film);
+        log.debug("Данные фильма изменены: {}", film1);
+        return film1;
     }
 
     @PutMapping("/{filmId}/like/{userId}")
@@ -71,8 +72,9 @@ public class FilmController {
     @GetMapping("/popular")
     public Collection<Film> popularFilms(@RequestParam(defaultValue = "10", required = false) Integer count) {
         log.debug("Пришел /GET запрос на получение списка самых популярных фильмов в количестве {}", count);
-        log.debug("Ответ отправлен: {}", filmService.popularFilms(count));
-        return filmService.popularFilms(count);
+        Collection<Film> films = filmService.popularFilms(count);
+        log.debug("Ответ отправлен: {}", films);
+        return films;
     }
 }
 //{

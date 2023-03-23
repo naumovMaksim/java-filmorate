@@ -1,9 +1,9 @@
 package ru.yandex.practicum.filmorate.exceptions;
 
-public class NullException extends RuntimeException {
+public class DataNotFoundException extends RuntimeException {
     private final String parameter;
 
-    public NullException(String parameter) {
+    public DataNotFoundException(String parameter) {
         this.parameter = parameter;
     }
 

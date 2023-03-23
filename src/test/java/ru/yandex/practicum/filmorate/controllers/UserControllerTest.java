@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.controllers;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.exceptions.NullException;
+import ru.yandex.practicum.filmorate.exceptions.DataNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.user.UserService;
@@ -52,7 +52,7 @@ class UserControllerTest {
     @Test
     void findUserWithWrongData() {
         controller.create(user);
-        final NullException exception = assertThrows(NullException.class,
+        final DataNotFoundException exception = assertThrows(DataNotFoundException.class,
                 () -> controller.findUser(0));
         assertEquals("Пользователь не найден.", exception.getParameter());
     }
@@ -186,7 +186,7 @@ class UserControllerTest {
                 .build();
         controller.create(user);
         controller.create(user1);
-        final NullException exception = assertThrows(NullException.class,
+        final DataNotFoundException exception = assertThrows(DataNotFoundException.class,
                 () -> controller.addFriend(0, 0));
         assertEquals("Пользователь не найден.", exception.getParameter());
     }
@@ -224,7 +224,7 @@ class UserControllerTest {
         controller.addFriend(user.getId(), user1.getId());
         assertTrue(user.getFriends().contains(user1.getId()));
         assertTrue(user1.getFriends().contains(user.getId()));
-        final NullException exception = assertThrows(NullException.class,
+        final DataNotFoundException exception = assertThrows(DataNotFoundException.class,
                 () -> controller.deleteFriend(1, 0));
         assertEquals("Пользователь не найден.", exception.getParameter());
     }

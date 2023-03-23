@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.NullException;
+import ru.yandex.practicum.filmorate.exceptions.DataNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -13,7 +13,7 @@ import java.util.*;
 @Service
 @Slf4j
 public class UserService {
-    UserStorage userStorage;
+    private final UserStorage userStorage;
 
     @Autowired
     public UserService(UserStorage userStorage) {
@@ -36,7 +36,7 @@ public class UserService {
         User friend = userStorage.findUser(friendId);
         if (!addingUser.getFriends().contains(friendId)) {
             log.error("Такого пользователя нет у вас в друзьях.");
-            throw new NullException("Такого пользователя нет у вас в друзьях.");
+            throw new DataNotFoundException("Такого пользователя нет у вас в друзьях.");
         }
         addingUser.deleteFriend(friend);
         friend.deleteFriend(addingUser);

@@ -188,7 +188,7 @@ class FilmControllerTest {
     void addLikeWithWrongFilmData() {
         controller.create(film);
         inMemoryUserStorage.create(user);
-        final NullException exception = assertThrows(NullException.class,
+        final DataNotFoundException exception = assertThrows(DataNotFoundException.class,
                 () -> filmService.addLike(0, user.getId()));
         assertEquals("Фильм не найден.", exception.getParameter());
     }
@@ -197,7 +197,7 @@ class FilmControllerTest {
     void addLikeWithWrongUserData() {
         controller.create(film);
         inMemoryUserStorage.create(user);
-        final NullException exception = assertThrows(NullException.class,
+        final DataNotFoundException exception = assertThrows(DataNotFoundException.class,
                 () -> filmService.addLike(film.getId(), 0));
         assertEquals("Пользователь не найден.", exception.getParameter());
     }
@@ -218,7 +218,7 @@ class FilmControllerTest {
         inMemoryUserStorage.create(user);
         filmService.addLike(film.getId(), user.getId());
         assertTrue(film.getUsersLikes().contains(user.getId()));
-        final NullException exception = assertThrows(NullException.class,
+        final DataNotFoundException exception = assertThrows(DataNotFoundException.class,
                 () -> controller.deleteLike(0, user.getId()));
         assertTrue(film.getUsersLikes().contains(user.getId()));
         assertEquals("Фильм не найден.", exception.getParameter());
@@ -230,7 +230,7 @@ class FilmControllerTest {
         inMemoryUserStorage.create(user);
         filmService.addLike(film.getId(), user.getId());
         assertTrue(film.getUsersLikes().contains(user.getId()));
-        final NullException exception = assertThrows(NullException.class,
+        final DataNotFoundException exception = assertThrows(DataNotFoundException.class,
                 () -> controller.deleteLike(film.getId(), 0));
         assertTrue(film.getUsersLikes().contains(user.getId()));
         assertEquals("Пользователь не найден.", exception.getParameter());

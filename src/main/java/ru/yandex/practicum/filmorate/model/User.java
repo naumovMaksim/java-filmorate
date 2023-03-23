@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.minidev.json.annotate.JsonIgnore;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
@@ -28,6 +29,7 @@ public class User {
     private String name;
     @NotNull
     private LocalDate birthday;
+    @JsonIgnore
     private Set<Integer> friends = new HashSet<>();
 
     public User(@Valid int id, @Valid String email, @Valid String login, String name, @Valid LocalDate birthday) {
