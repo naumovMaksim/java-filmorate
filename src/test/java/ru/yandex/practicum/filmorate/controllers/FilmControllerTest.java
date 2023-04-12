@@ -195,7 +195,7 @@ class FilmControllerTest {
     void addLike() {
         controller.create(film);
         inMemoryUserStorage.create(user);
-        filmService.addLike(film.getId(), user.getId());
+        controller.addLike(film.getId(), user.getId());
         assertTrue(film.getUsersLikes().contains(user.getId()));
     }
 
@@ -204,7 +204,7 @@ class FilmControllerTest {
         controller.create(film);
         inMemoryUserStorage.create(user);
         final DataNotFoundException exception = assertThrows(DataNotFoundException.class,
-                () -> filmService.addLike(0, user.getId()));
+                () -> controller.addLike(0, user.getId()));
         assertEquals("Фильм не найден.", exception.getParameter());
     }
 
@@ -213,7 +213,7 @@ class FilmControllerTest {
         controller.create(film);
         inMemoryUserStorage.create(user);
         final DataNotFoundException exception = assertThrows(DataNotFoundException.class,
-                () -> filmService.addLike(film.getId(), 0));
+                () -> controller.addLike(film.getId(), 0));
         assertEquals("Пользователь не найден.", exception.getParameter());
     }
 
@@ -221,7 +221,7 @@ class FilmControllerTest {
     void deleteLike() {
         controller.create(film);
         inMemoryUserStorage.create(user);
-        filmService.addLike(film.getId(), user.getId());
+        controller.addLike(film.getId(), user.getId());
         assertTrue(film.getUsersLikes().contains(user.getId()));
         controller.deleteLike(film.getId(), user.getId());
         assertFalse(film.getUsersLikes().contains(user.getId()));
@@ -231,7 +231,7 @@ class FilmControllerTest {
     void deleteLikeWithWrongFilmData() {
         controller.create(film);
         inMemoryUserStorage.create(user);
-        filmService.addLike(film.getId(), user.getId());
+        controller.addLike(film.getId(), user.getId());
         assertTrue(film.getUsersLikes().contains(user.getId()));
         final DataNotFoundException exception = assertThrows(DataNotFoundException.class,
                 () -> controller.deleteLike(0, user.getId()));
@@ -243,7 +243,7 @@ class FilmControllerTest {
     void deleteLikeWithWrongUserData() {
         controller.create(film);
         inMemoryUserStorage.create(user);
-        filmService.addLike(film.getId(), user.getId());
+        controller.addLike(film.getId(), user.getId());
         assertTrue(film.getUsersLikes().contains(user.getId()));
         final DataNotFoundException exception = assertThrows(DataNotFoundException.class,
                 () -> controller.deleteLike(film.getId(), 0));
@@ -289,12 +289,12 @@ class FilmControllerTest {
         inMemoryUserStorage.create(user);
         inMemoryUserStorage.create(user2);
         inMemoryUserStorage.create(user3);
-        filmService.addLike(film.getId(), user.getId());
-        filmService.addLike(film.getId(), user2.getId());
-        filmService.addLike(film.getId(), user3.getId());
-        filmService.addLike(film2.getId(), user.getId());
-        filmService.addLike(film2.getId(), user2.getId());
-        filmService.addLike(film3.getId(), user.getId());
+        controller.addLike(film.getId(), user.getId());
+        controller.addLike(film.getId(), user2.getId());
+        controller.addLike(film.getId(), user3.getId());
+        controller.addLike(film2.getId(), user.getId());
+        controller.addLike(film2.getId(), user2.getId());
+        controller.addLike(film3.getId(), user.getId());
         LinkedList<Film> films = new LinkedList<>();
         films.addFirst(film);
         films.addLast(film2);
