@@ -9,4 +9,5 @@ public interface FilmStorage {
     Collection<Film> findAll();
     Film create(Film film);
     Film update(Film film);
+    Collection<Film> getPopularFilms(Integer count);
 }

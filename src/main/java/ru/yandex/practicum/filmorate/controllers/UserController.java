@@ -12,6 +12,7 @@ import java.util.Collection;
 @RestController
 @RequestMapping("/users")
 @Slf4j
+
 public class UserController {
     private final UserService userService;
 
@@ -48,7 +49,7 @@ public class UserController {
     public User updateOrCreate(@Valid @RequestBody User user) {
         log.debug("Пришел /PUT запрос на из мнение данных пользователя: {}", user);
         User user1 = userService.updateUser(user);
-        log.debug("Пользователь добавлен: {}", user1);
+        log.debug("Данные пользователя изменены: {}", user1);
         return user1;
     }
 
@@ -86,8 +87,8 @@ public class UserController {
 }
 // Строки в Json для проверки программы.
 //        {
-//        "email": "dusag@mail.com",
-//        "login": "dartsaider",
-//        "name": "Cat",
-//        "birthday": "2001-12-25"
-//        }
+//                "email": "dusa@gmail.com",
+//                "login": "dusa",
+//                "name": "max",
+//                "birthday": "1999-12-12"
+//         }

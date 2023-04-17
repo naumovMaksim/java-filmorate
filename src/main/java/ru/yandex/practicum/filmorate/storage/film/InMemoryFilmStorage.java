@@ -46,6 +46,11 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film;
     }
 
+    @Override
+    public Collection<Film> getPopularFilms(Integer count) {
+        return null;
+    }
+
     private int generateId() {
         return ++generatorId;
     }

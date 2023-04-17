@@ -30,33 +30,22 @@ public class Film {
     @Min(1)
     private int duration;
     @NotNull
-    private int rating;
+    private int rate;
+    private Mpa mpa;
     @JsonIgnore
     private Set<Integer> usersLikes = new HashSet<>();
     @JsonIgnore
-    private Set<Genere> genere = new TreeSet<>();
+    private LinkedHashSet<Genere> genres = new LinkedHashSet<>();
 
     public Film(@Valid int id, @Valid String name, @Valid String description, @Valid LocalDate releaseDate
-            , @Valid int duration, @Valid int rating) {
+            , @Valid int duration, @Valid int rating, Mpa mpa) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
-        this.rating = rating;
-        this.usersLikes = new HashSet<>();
-        this.genere = new HashSet<>();
-    }
-
-    public void setUsersLikes(User user) {
-        usersLikes.add(user.getId());
-    }
-
-    public void deleteUsersLikes(User user) {
-        usersLikes.remove(user.getId());
-    }
-
-    public void setGenere(Genere g) {
-        genere.add(g);
+        this.rate = rating;
+        this.mpa = mpa;
+        this.genres = new LinkedHashSet<>();
     }
 }

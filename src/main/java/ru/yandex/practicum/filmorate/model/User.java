@@ -10,9 +10,10 @@ import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.Set;
 
 @Data
 @Builder
@@ -30,7 +31,7 @@ public class User {
     @NotNull
     private LocalDate birthday;
     @JsonIgnore
-    private Set<Integer> friends = new HashSet<>();
+    private HashSet<Integer> friends = new HashSet<>();
 
     public User(@Valid int id, @Valid String email, @Valid String login, String name, @Valid LocalDate birthday) {
         this.id = id;
@@ -41,11 +42,19 @@ public class User {
         this.friends = new HashSet<>();
     }
 
-    public void setFriends(User user) {
-        friends.add(user.getId());
-    }
+    public static User makeUser(ResultSet rs) throws SQLException {
+        int id = rs.getInt("user_id");
+        String email = rs.getString("email");
+        String login = rs.getString("login");
+        String name = rs.getString("name");
+        LocalDate birthday = rs.getDate("birthday").toLocalDate();
 
-    public void deleteFriend(User user) {
-        friends.remove(user.getId());
+        return User.builder()
+                .id(id)
+                .email(email)
+                .login(login)
+                .name(name)
+                .birthday(birthday)
+                .build();
     }
 }

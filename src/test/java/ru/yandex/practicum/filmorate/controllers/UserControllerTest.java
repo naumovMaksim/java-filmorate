@@ -2,11 +2,14 @@ package ru.yandex.practicum.filmorate.controllers;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.core.JdbcTemplate;
+import ru.yandex.practicum.filmorate.dao.FriendsDao;
 import ru.yandex.practicum.filmorate.exceptions.DataNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.validators.UserValidator;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -15,8 +18,11 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserControllerTest {
+    JdbcTemplate jdbcTemplate = new JdbcTemplate();
     InMemoryUserStorage inMemoryUserStorage = new InMemoryUserStorage();
-    UserService userService = new UserService(inMemoryUserStorage);
+    UserValidator userValidator = new UserValidator();
+    FriendsDao friendsDao = new FriendsDao(jdbcTemplate);
+    UserService userService = new UserService(inMemoryUserStorage, userValidator, friendsDao);
     UserController controller = new UserController(userService);
     User user;
 
