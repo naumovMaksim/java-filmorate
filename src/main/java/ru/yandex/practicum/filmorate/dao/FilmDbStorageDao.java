@@ -112,7 +112,10 @@ public class FilmDbStorageDao implements FilmStorage {
 
     @Override
     public Collection<Film> getPopularFilms(Integer limit) {
-        String sql = "SELECT f.FILM_ID, f.Name, f.DESCRIPTION, f.RELEASE_DATE, f.DURATION, f.RATING_ID, f.MPA FROM FILMS AS f LEFT JOIN FILM_LIKES AS fl ON f.FILM_ID = fl.FILM_ID GROUP BY f.FILM_ID ORDER BY COUNT(fl.FILM_ID) desc LIMIT ?";
+        String sql = "SELECT f.FILM_ID, f.Name, f.DESCRIPTION, f.RELEASE_DATE, f.DURATION, f.RATING_ID, f.MPA " +
+                "FROM FILMS AS f " +
+                "LEFT JOIN FILM_LIKES AS fl ON f.FILM_ID = fl.FILM_ID " +
+                "GROUP BY f.FILM_ID ORDER BY COUNT(fl.FILM_ID) desc LIMIT ?";
         Collection<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), limit);
         films.forEach(film -> {
             film.setGenres(filmGenreDao.getFilmGenre(film.getId()));

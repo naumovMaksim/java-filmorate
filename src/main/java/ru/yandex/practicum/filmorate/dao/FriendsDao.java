@@ -47,8 +47,11 @@ public class FriendsDao {
     public Collection<User> getUserFriends(int id) {
         String sql = "SELECT U.USER_ID, U.EMAIL, U.LOGIN, U.NAME, U.BIRTHDAY FROM USER_FRIENDS " +
                 "LEFT JOIN USERS U on U.USER_ID = USER_FRIENDS.FRIEND_ID WHERE USER_FRIENDS.USER_ID = ?";
-
-        return jdbcTemplate.query(sql, (rs, rowNum) -> User.makeUser(rs), id);
+        Collection<User> users = jdbcTemplate.query(sql, (rs, rowNum) -> User.makeUser(rs), id);
+        for (User user : users) {
+            user.setFriends(getUserFriendsIds(user.getId()));
+        }
+        return users;
     }
 
     public Collection<User> getCommonFriends(int userId, int friendId) {
@@ -58,7 +61,11 @@ public class FriendsDao {
                 "WHERE uf.USER_ID = ? AND uf.FRIEND_ID IN (SELECT FRIEND_ID FROM USER_FRIENDS WHERE USER_ID = ?)";
 
         try {
-            return jdbcTemplate.query(sql, (rs, rowNum) -> User.makeUser(rs), friendId, userId);
+            Collection<User> users = jdbcTemplate.query(sql, (rs, rowNum) -> User.makeUser(rs), friendId, userId);
+            for (User user : users) {
+                user.setFriends(getUserFriendsIds(user.getId()));
+            }
+            return users;
         } catch (DataIntegrityViolationException e) {
             log.error("Пользователи с идентификаторами id = {} и id = {} не найдены", userId, friendId);
             throw new DataNotFoundException(String.format("Пользователи с идентификаторами id = %d и id = %d не найдены"
