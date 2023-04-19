@@ -37,8 +37,8 @@ public class Film {
     @JsonIgnore
     private LinkedHashSet<Genere> genres = new LinkedHashSet<>();
 
-    public Film(@Valid int id, @Valid String name, @Valid String description, @Valid LocalDate releaseDate
-            , @Valid int duration, @Valid int rating, Mpa mpa) {
+    public Film(@Valid int id, @Valid String name, @Valid String description, @Valid LocalDate releaseDate,
+                @Valid int duration, @Valid int rating, Mpa mpa) {
         this.id = id;
         this.name = name;
         this.description = description;
