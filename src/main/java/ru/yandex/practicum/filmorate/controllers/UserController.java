@@ -80,7 +80,7 @@ public class UserController {
     @GetMapping("/{id}/friends/common/{otherId}")
     public Collection<User> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
         log.debug("Пришел /GET запрос на получение списка общих друзей пользователя с id {} и пользователя с id {}", id, otherId);
-        Collection <User> users = userService.getCommonFriends(id, otherId);
+        Collection<User> users = userService.getCommonFriends(id, otherId);
         log.debug("Ответ отправлен: {}", users);
         return users;
     }
