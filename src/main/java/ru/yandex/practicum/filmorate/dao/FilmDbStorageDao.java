@@ -43,7 +43,7 @@ public class FilmDbStorageDao implements FilmStorage {
             film.setUsersLikes(likesDao.getFilmLikesUserIds(id));
             film.setGenres(filmGenreDao.getFilmGenre(id));
             log.debug("Найден фильм: {}", film);
-                return film;
+            return film;
         } catch (EmptyResultDataAccessException e) {
             log.error("Фильм с id = {} не найден", id);
             throw new DataNotFoundException(String.format("Фильм с id = %d не найден", id));
@@ -53,7 +53,7 @@ public class FilmDbStorageDao implements FilmStorage {
     @Override
     public Collection<Film> findAll() {
         String sql = "SELECT * FROM FILMS";
-        Collection<Film> films = jdbcTemplate.query(sql,  (rs, rowNum) -> makeFilm(rs));
+        Collection<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs));
         for (Film film : films) {
             filmGenreDao.addGenreToFilm(film);
             film.setUsersLikes(likesDao.getFilmLikesUserIds(film.getId()));
@@ -83,7 +83,7 @@ public class FilmDbStorageDao implements FilmStorage {
             filmGenreDao.addGenreToFilm(film);
         }
         return film;
-        }
+    }
 
     @Override
     public Film update(Film film) {
