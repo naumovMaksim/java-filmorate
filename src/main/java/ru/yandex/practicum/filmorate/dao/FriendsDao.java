@@ -25,8 +25,8 @@ public class FriendsDao {
             jdbcTemplate.update(sql, friendId, userId);
         } catch (DataIntegrityViolationException e) {
             log.error("Пользователи с идентификаторами id = {} и id = {} не найдены", userId, friendId);
-            throw new DataNotFoundException(String.format("Пользователи с идентификаторами id = %d и id = %d не найдены"
-                    , userId, friendId));
+            throw new DataNotFoundException(
+                    String.format("Пользователи с идентификаторами id = %d и id = %d не найдены", userId, friendId));
         }
     }
 
@@ -39,8 +39,8 @@ public class FriendsDao {
             jdbcTemplate.update(sql, friendId, userId);
         } catch (DataIntegrityViolationException e) {
             log.error("Пользователи с идентификаторами id = {} и id = {} не найдены", userId, friendId);
-            throw new DataNotFoundException(String.format("Пользователи с идентификаторами id = %d и id = %d не найдены"
-                    , userId, friendId));
+            throw new DataNotFoundException(
+                    String.format("Пользователи с идентификаторами id = %d и id = %d не найдены", userId, friendId));
         }
     }
 
@@ -68,8 +68,8 @@ public class FriendsDao {
             return users;
         } catch (DataIntegrityViolationException e) {
             log.error("Пользователи с идентификаторами id = {} и id = {} не найдены", userId, friendId);
-            throw new DataNotFoundException(String.format("Пользователи с идентификаторами id = %d и id = %d не найдены"
-                    , userId, friendId));
+            throw new DataNotFoundException(
+                    String.format("Пользователи с идентификаторами id = %d и id = %d не найдены", userId, friendId));
         }
     }
 
