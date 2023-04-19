@@ -22,7 +22,7 @@ public class FriendsDao {
                 "ON uf.FRIEND_ID = S.friend_id AND uf.USER_ID = S.user_id " +
                 "WHEN NOT MATCHED THEN INSERT VALUES (S.friend_id, S.user_id)";
         try {
-                jdbcTemplate.update(sql, friendId, userId);
+            jdbcTemplate.update(sql, friendId, userId);
         } catch (DataIntegrityViolationException e) {
             log.error("Пользователи с идентификаторами id = {} и id = {} не найдены", userId, friendId);
             throw new DataNotFoundException(String.format("Пользователи с идентификаторами id = %d и id = %d не найдены"

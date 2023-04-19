@@ -90,8 +90,8 @@ public class FilmDbStorageDao implements FilmStorage {
         String sql = "UPDATE FILMS SET name = ?, description = ?, release_date = ?" +
                 ", duration = ?, rating_id = ?, mpa = ? WHERE film_id = ?";
 
-        int update = jdbcTemplate.update(sql, film.getName(), film.getDescription()
-                , film.getReleaseDate(), film.getDuration(), film.getRate(), film.getMpa().getId(), film.getId());
+        int update = jdbcTemplate.update(sql, film.getName(), film.getDescription(),
+                film.getReleaseDate(), film.getDuration(), film.getRate(), film.getMpa().getId(), film.getId());
         if (update == 0) {
             log.error("Фильм с id = {} не найден", film.getId());
             throw new DataNotFoundException(String.format("Фильм с id = %d не найден", film.getId()));

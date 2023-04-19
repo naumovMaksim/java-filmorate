@@ -21,9 +21,9 @@ public class LikesDao {
 
     public Collection<User> getFilmLikes(int id) {
         String sql = "SELECT u.user_ID, u.email, u.login, u.name, u.birthday " +
-                    "FROM FILM_LIKES AS fl" +
-                    "LEFT JOIN USERS AS u ON flLEFT.USER_ID = u.USER_ID " +
-                    "WHERE FILM_ID = ?";
+                "FROM FILM_LIKES AS fl" +
+                "LEFT JOIN USERS AS u ON flLEFT.USER_ID = u.USER_ID " +
+                "WHERE FILM_ID = ?";
         Collection<User> users = jdbcTemplate.query(sql, (rs, rowNum) -> User.makeUser(rs), id);
         for (User user : users) {
             user.setFriends(friendsDao.getUserFriendsIds(user.getId()));
