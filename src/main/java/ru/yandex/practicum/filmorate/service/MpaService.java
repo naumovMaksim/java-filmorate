@@ -12,11 +12,11 @@ import java.util.Collection;
 public class MpaService {
     private final MpaDao mpaDao;
 
-    public Collection<Mpa> getAllRatings() {
+    public Collection<Mpa> getAllMpa() {
         return mpaDao.getAllMpa();
     }
 
-    public Mpa getRatingById(int id) {
+    public Mpa getMpaById(int id) {
         return mpaDao.getMpaById(id);
     }
 }

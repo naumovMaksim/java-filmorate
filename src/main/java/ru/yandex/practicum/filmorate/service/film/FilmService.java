@@ -36,10 +36,9 @@ public class FilmService {
     }
 
     public void addLike(int filmId, int userId) {
-        Film film = filmStorage.findFilm(filmId);
         User user = userStorage.findUser(userId);
         userValidator.validate(user);
-        if (film.getUsersLikes().contains(userId)) {
+        if (likesDao.getFilmLikes(filmId).contains(user)) {
             log.error("Фильм с id = {} не может быть лайкнут дважды", filmId);
             throw new ValidationException(String.format("Фильм с id = %d не может быть лайкнут дважды", filmId));
         }
@@ -47,10 +46,9 @@ public class FilmService {
     }
 
     public void deleteLike(int filmId, int userId) {
-        Film film = filmStorage.findFilm(filmId);
         User user = userStorage.findUser(userId);
         userValidator.validate(user);
-        if (!film.getUsersLikes().contains(userId)) {
+        if (!likesDao.getFilmLikes(filmId).contains(user)) {
             log.error("Вы уже убрали лайк с фильма id = {}", filmId);
             throw new ValidationException(String.format("Вы уже убрали лайк с фильма id = %d", filmId));
         }
@@ -58,7 +56,8 @@ public class FilmService {
     }
 
     public Collection<Film> popularFilms(Integer count) {
-        return filmStorage.getPopularFilms(count);
+        final Collection<Film> films = filmStorage.getPopularFilms(count);
+        return films;
     }
 
     public Film findFilm(int id) {
@@ -76,8 +75,8 @@ public class FilmService {
         return filmStorage.create(film);
     }
 
-    public Film updateFilm(Film film) {
+    public void updateFilm(Film film) {
         filmValidator.validate(film);
-        return filmStorage.update(film);
+        filmStorage.update(film);
     }
 }

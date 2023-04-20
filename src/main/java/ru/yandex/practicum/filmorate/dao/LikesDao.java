@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.DataNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.likes.LikesStorage;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -14,23 +15,20 @@ import java.util.HashSet;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class LikesDao {
+public class LikesDao implements LikesStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private final FriendsDao friendsDao;
 
+    @Override
     public Collection<User> getFilmLikes(int id) {
         String sql = "SELECT u.user_ID, u.email, u.login, u.name, u.birthday " +
                 "FROM FILM_LIKES AS fl" +
                 "LEFT JOIN USERS AS u ON flLEFT.USER_ID = u.USER_ID " +
                 "WHERE FILM_ID = ?";
-        Collection<User> users = jdbcTemplate.query(sql, (rs, rowNum) -> User.makeUser(rs), id);
-        for (User user : users) {
-            user.setFriends(friendsDao.getUserFriendsIds(user.getId()));
-        }
-        return users;
+        return jdbcTemplate.query(sql, (rs, rowNum) -> User.makeUser(rs), id);
     }
 
+    @Override
     public HashSet<Integer> getFilmLikesUserIds(int id) {
         String sql = "SELECT u.user_ID, u.email, u.login, u.name, u.birthday " +
                 "FROM FILM_LIKES AS fl" +
@@ -44,6 +42,7 @@ public class LikesDao {
         return setLikes;
     }
 
+    @Override
     public void likeFilm(int filmId, int userId) {
         String sql = "INSERT INTO FILM_LIKES (FILM_ID, USER_ID) VALUES (?,?)";
 
@@ -56,6 +55,7 @@ public class LikesDao {
         }
     }
 
+    @Override
     public void deleteLike(int filmId, int userId) {
         String sql = "DELETE FROM FILM_LIKES WHERE FILM_ID = ? AND USER_ID = ?";
 

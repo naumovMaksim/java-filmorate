@@ -28,8 +28,7 @@ public class UserService {
     }
 
     public void addFriend(int addingUserId, int friendId) {
-        User addingUser = userStorage.findUser(addingUserId);
-        if (addingUser.getFriends().contains(friendId)) {
+        if (friendsDao.getUserFriendsIds(addingUserId).contains(friendId)) {
             log.error("Пользователь уже есть у вас в друзьях.");
             throw new ValidationException("Пользователь уже есть у вас в друзьях.");
         }
@@ -37,8 +36,7 @@ public class UserService {
     }
 
     public void deleteFriend(int addingUserId, int friendId) {
-        User addingUser = userStorage.findUser(addingUserId);
-        if (!addingUser.getFriends().contains(friendId)) {
+        if (!friendsDao.getUserFriendsIds(addingUserId).contains(friendId)) {
             log.error("Такого пользователя нет у вас в друзьях.");
             throw new DataNotFoundException("Такого пользователя нет у вас в друзьях.");
         }

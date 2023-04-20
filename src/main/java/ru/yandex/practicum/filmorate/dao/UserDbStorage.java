@@ -24,7 +24,6 @@ import java.util.Objects;
 public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private final FriendsDao friendsDao;
 
     @Override
     public User findUser(int id) {
@@ -34,7 +33,6 @@ public class UserDbStorage implements UserStorage {
             User user = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> User.makeUser(rs), id);
             log.debug("Найден пользователь {}", user);
             assert user != null;
-            user.setFriends(friendsDao.getUserFriendsIds(id));
             return user;
         } catch (EmptyResultDataAccessException e) {
             log.error("Пользователь с id = {} не найден", id);
@@ -46,11 +44,7 @@ public class UserDbStorage implements UserStorage {
     public Collection<User> findAll() {
         String sql = "SELECT * FROM USERS";
 
-        Collection<User> users = jdbcTemplate.query(sql, (rs, rowNum) -> User.makeUser(rs));
-        for (User user : users) {
-            user.setFriends(friendsDao.getUserFriendsIds(user.getId()));
-        }
-        return users;
+        return jdbcTemplate.query(sql, (rs, rowNum) -> User.makeUser(rs));
     }
 
     @Override
@@ -88,7 +82,6 @@ public class UserDbStorage implements UserStorage {
             log.error("Пользоватьель с id = {} не найден", user.getId());
             throw new DataNotFoundException(String.format("Пользоватьель с id = %d не найден", user.getId()));
         }
-        user.setFriends(friendsDao.getUserFriendsIds(user.getId()));
         return user;
     }
 }

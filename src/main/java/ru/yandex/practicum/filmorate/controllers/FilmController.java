@@ -44,11 +44,12 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film updateOrCreate(@RequestBody Film film) {
+    public Film update(@RequestBody Film film) {
         log.debug("Получен /PUT запрос на изменение данных фильма: {}", film);
-        Film film1 = filmService.updateFilm(film);
-        log.debug("Данные фильма изменены: {}", film1);
-        return film1;
+        filmService.updateFilm(film);
+        Film updatedFilm = filmService.findFilm(film.getId());
+        log.debug("Данные фильма изменены: {}", updatedFilm);
+        return updatedFilm;
     }
 
     @PutMapping("/{filmId}/like/{userId}")

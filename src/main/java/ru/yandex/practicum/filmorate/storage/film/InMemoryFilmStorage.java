@@ -36,14 +36,13 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film;
     }
 
-    public Film update(Film film) {
+    public void update(Film film) {
         if (!films.containsKey(film.getId())) {
             log.error("Фильм не найден.");
             throw new DataNotFoundException("Фильм не найден");
         }
         validator.validate(film);
         films.put(film.getId(), film);
-        return film;
     }
 
     @Override

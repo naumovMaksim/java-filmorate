@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.minidev.json.annotate.JsonIgnore;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -32,9 +31,6 @@ public class Film {
     @NotNull
     private int rate;
     private Mpa mpa;
-    @JsonIgnore
-    private Set<Integer> usersLikes = new HashSet<>();
-    @JsonIgnore
     private LinkedHashSet<Genere> genres = new LinkedHashSet<>();
 
     public Film(@Valid int id, @Valid String name, @Valid String description, @Valid LocalDate releaseDate,

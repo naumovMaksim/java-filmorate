@@ -22,7 +22,7 @@ public class MpaController {
     @GetMapping
     public Collection<Mpa> getAllRatings() {
         log.debug("Поступил GET запрос на получение всех рейтингов");
-        Collection<Mpa> ratings = mpaService.getAllRatings();
+        Collection<Mpa> ratings = mpaService.getAllMpa();
         log.debug("Ответ отправлен: {}", ratings);
         return ratings;
     }
@@ -30,7 +30,7 @@ public class MpaController {
     @GetMapping("/{id}")
     public Mpa getRatingById(@PathVariable int id) {
         log.debug("Поступил GET запрос на получение рейтинга по id");
-        Mpa rating = mpaService.getRatingById(id);
+        Mpa rating = mpaService.getMpaById(id);
         log.debug("Ответ отправлен: {}", rating);
         return rating;
     }

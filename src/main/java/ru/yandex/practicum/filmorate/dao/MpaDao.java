@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.DataNotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,16 +16,18 @@ import java.util.Collection;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class MpaDao {
+public class MpaDao implements MpaStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
+    @Override
     public Collection<Mpa> getAllMpa() {
         String sql = "SELECT * FROM MPA";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeMpa(rs));
     }
 
+    @Override
     public Mpa getMpaById(int id) {
         String sql = "SELECT * FROM MPA WHERE MPA_ID = ?";
 

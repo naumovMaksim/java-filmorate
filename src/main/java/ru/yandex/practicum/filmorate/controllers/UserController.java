@@ -57,16 +57,14 @@ public class UserController {
     public void addFriend(@PathVariable int id, @PathVariable int friendId) {
         log.debug("Пришел /POST запрос на добавление друга с id: {} к пользователю с id: {}", friendId, id);
         userService.addFriend(id, friendId);
-        User addingUser = userService.findUser(id);
-        log.debug("Друг c id: {} добавлен: {}", friendId, addingUser.getFriends());
+        log.debug("Друг c id: {} добавлен", friendId);
     }
 
     @DeleteMapping("{id}/friends/{friendId}")
     public void deleteFriend(@PathVariable int id, @PathVariable int friendId) {
         log.debug("Пришел /DELETE запрос на удаление друга с id {} у пользователя с id {}", friendId, id);
         userService.deleteFriend(id, friendId);
-        User addingUser = userService.findUser(id);
-        log.debug("Друг с id: {} удален: {}", friendId, addingUser.getFriends());
+        log.debug("Друг с id: {} удален", friendId);
     }
 
     @GetMapping("/{id}/friends")

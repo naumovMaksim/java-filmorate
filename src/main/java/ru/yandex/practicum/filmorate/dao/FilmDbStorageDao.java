@@ -11,7 +11,8 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.DataNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmGenreService;
+import ru.yandex.practicum.filmorate.service.MpaService;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.sql.Date;
@@ -28,20 +29,17 @@ import java.util.*;
 public class FilmDbStorageDao implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private final LikesDao likesDao;
-    private final FilmGenreDao filmGenreDao;
-    private final MpaDao mpaDao;
+    private final FilmGenreService filmGenreService;
+    private final MpaService mpaService;
 
     @Override
     public Film findFilm(int id) {
-        String sql = "SELECT * FROM FILMS WHERE film_id = ?";
+        String sql = "SELECT * FROM FILMS WHERE FILM_ID = ?";
 
         try {
             Film film = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeFilm(rs), id);
             assert film != null;
-            filmGenreDao.addGenreToFilm(film);
-            film.setUsersLikes(likesDao.getFilmLikesUserIds(id));
-            film.setGenres(filmGenreDao.getFilmGenre(id));
+            film.setGenres(filmGenreService.getFilmGenre(id));
             log.debug("Найден фильм: {}", film);
             return film;
         } catch (EmptyResultDataAccessException e) {
@@ -52,19 +50,17 @@ public class FilmDbStorageDao implements FilmStorage {
 
     @Override
     public Collection<Film> findAll() {
-        String sql = "SELECT * FROM FILMS";
+        String sql = "SELECT * FROM FILMS";//тут тоже не понял как мне получить жанры одним запросом вместе с фильмом, если делать через left join, то в таблице фильмы дублируются, потому что одному фильму может соответстовать несколько жанров
         Collection<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs));
         for (Film film : films) {
-            filmGenreDao.addGenreToFilm(film);
-            film.setUsersLikes(likesDao.getFilmLikesUserIds(film.getId()));
-            film.setGenres(filmGenreDao.getFilmGenre(film.getId()));
+            film.setGenres(filmGenreService.getFilmGenre(film.getId()));
         }
         return films;
     }
 
     @Override
     public Film create(Film film) {
-        String sql = "INSERT INTO FILMS (name, description, release_date, duration, rating_id, mpa) VALUES (?,?,?,?,?,?)";
+        String sql = "INSERT INTO FILMS (name, description, release_date, duration, rate, mpa) VALUES (?,?,?,?,?,?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -80,15 +76,15 @@ public class FilmDbStorageDao implements FilmStorage {
         int idKey = Objects.requireNonNull(keyHolder.getKey()).intValue();
         film.setId(idKey);
         if (film.getGenres() != null) {
-            filmGenreDao.addGenreToFilm(film);
+            filmGenreService.addGenreToFilm(film);
         }
         return film;
     }
 
     @Override
-    public Film update(Film film) {
+    public void update(Film film) {
         String sql = "UPDATE FILMS SET name = ?, description = ?, release_date = ?" +
-                ", duration = ?, rating_id = ?, mpa = ? WHERE film_id = ?";
+                ", duration = ?, rate = ?, mpa = ? WHERE film_id = ?";
 
         int update = jdbcTemplate.update(sql, film.getName(), film.getDescription(),
                 film.getReleaseDate(), film.getDuration(), film.getRate(), film.getMpa().getId(), film.getId());
@@ -97,30 +93,19 @@ public class FilmDbStorageDao implements FilmStorage {
             throw new DataNotFoundException(String.format("Фильм с id = %d не найден", film.getId()));
         }
         if (film.getGenres() != null) {
-            filmGenreDao.deleteAllFilmGenres(film);
-            filmGenreDao.addGenreToFilm(film);
-            film.setGenres(filmGenreDao.getFilmGenre(film.getId()));
+            filmGenreService.deleteAllFilmGenres(film);
+            filmGenreService.addGenreToFilm(film);
         }
-        Collection<User> likes = likesDao.getFilmLikes(film.getId());
-        HashSet<Integer> setLikes = new HashSet<>();
-        for (User user : likes) {
-            setLikes.add(user.getId());
-        }
-        film.setUsersLikes(setLikes);
-        return film;
     }
 
     @Override
     public Collection<Film> getPopularFilms(Integer limit) {
-        String sql = "SELECT f.FILM_ID, f.Name, f.DESCRIPTION, f.RELEASE_DATE, f.DURATION, f.RATING_ID, f.MPA " +
+        String sql = "SELECT f.FILM_ID, f.Name, f.DESCRIPTION, f.RELEASE_DATE, f.DURATION, f.RATE, f.MPA " +
                 "FROM FILMS AS f " +
                 "LEFT JOIN FILM_LIKES AS fl ON f.FILM_ID = fl.FILM_ID " +
                 "GROUP BY f.FILM_ID ORDER BY COUNT(fl.FILM_ID) desc LIMIT ?";
         Collection<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), limit);
-        films.forEach(film -> {
-            film.setGenres(filmGenreDao.getFilmGenre(film.getId()));
-            film.setUsersLikes(likesDao.getFilmLikesUserIds(film.getId()));
-        });
+        films.forEach(film -> film.setGenres(filmGenreService.getFilmGenre(film.getId())));
         return films;
     }
 
@@ -130,8 +115,8 @@ public class FilmDbStorageDao implements FilmStorage {
         String description = rs.getString("description");
         LocalDate date = rs.getDate("release_date").toLocalDate();
         int duration = rs.getInt("duration");
-        int ratingId = rs.getInt("rating_id");
-        Mpa mpa = new Mpa(rs.getInt("mpa"), mpaDao.getMpaById(rs.getInt("mpa")).getName());
+        int ratingId = rs.getInt("rate");
+        Mpa mpa = new Mpa(rs.getInt("mpa"), mpaService.getMpaById(rs.getInt("mpa")).getName());
         return new Film(id, name, description, date, duration, ratingId, mpa);
     }
 }
