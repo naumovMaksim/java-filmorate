@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,22 +28,20 @@ class UserDbStorageTest {
             .login("CatUser")
             .name("Cat")
             .birthday(LocalDate.of(2000, 1, 1))
-            .friends(new HashSet<>())
             .build();
     User user2 = User.builder()
             .email("dog@yandex.ru")
             .login("DogUser")
             .name("Dog")
             .birthday(LocalDate.of(2000, 1, 1))
-            .friends(new HashSet<>())
             .build();
 
 
 
     @BeforeEach
     void beforeEach() throws IOException {
-        jdbcTemplate.update(Files.readString(Paths.get("src/test/java/TestResources/schema1.sql")));
-        jdbcTemplate.update(Files.readString(Paths.get("src/test/java/TestResources/data1.sql")));
+        jdbcTemplate.update(Files.readString(Paths.get("src/test/java/resources/schema1.sql")));
+        jdbcTemplate.update(Files.readString(Paths.get("src/test/java/resources/data1.sql")));
     }
 
     @Test
@@ -75,7 +72,6 @@ class UserDbStorageTest {
                 .login("mrrCat")
                 .name("mrrrrrr")
                 .birthday(LocalDate.of(2000, 1, 1))
-                .friends(new HashSet<>())
                 .build();
         userDbStorage.update(User.builder()
                 .id(1)
@@ -83,7 +79,6 @@ class UserDbStorageTest {
                 .login("mrrCat")
                 .name("mrrrrrr")
                 .birthday(LocalDate.of(2000, 1, 1))
-                .friends(new HashSet<>())
                 .build());
         assertEquals(user2, userDbStorage.findUser(1));
     }

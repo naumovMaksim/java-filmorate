@@ -32,14 +32,13 @@ class UserControllerTest {
 
     @BeforeEach
     void beforeEach() throws IOException {
-        jdbcTemplate.update(Files.readString(Paths.get("src/test/java/TestResources/schema1.sql")));
-        jdbcTemplate.update(Files.readString(Paths.get("src/test/java/TestResources/data1.sql")));
+        jdbcTemplate.update(Files.readString(Paths.get("src/test/java/resources/schema1.sql")));
+        jdbcTemplate.update(Files.readString(Paths.get("src/test/java/resources/data1.sql")));
         user = User.builder()
                 .email("Santa@mail.ru")
                 .login("Santa")
                 .name("Санта")
                 .birthday(LocalDate.of(2000, Month.DECEMBER, 6))
-                .friends(new HashSet<>())
                 .build();
     }
 
@@ -115,7 +114,6 @@ class UserControllerTest {
                 .login("Santa")
                 .name("Санта")
                 .birthday(LocalDate.of(2000, Month.DECEMBER, 6))
-                .friends(new HashSet<>())
                 .build();
 
         controller.create(user);
@@ -178,7 +176,6 @@ class UserControllerTest {
                 .login("Santa")
                 .name("Санта Клаус")
                 .birthday(LocalDate.of(2021, 1, 1))
-                .friends(new HashSet<>())
                 .build();
         controller.create(user);
         controller.create(user1);
@@ -193,13 +190,12 @@ class UserControllerTest {
                 .login("Santa")
                 .name("Санта Клаус")
                 .birthday(LocalDate.of(2021, 1, 1))
-                .friends(new HashSet<>())
                 .build();
         controller.create(user);
         controller.create(user1);
         final DataNotFoundException exception = assertThrows(DataNotFoundException.class,
                 () -> controller.addFriend(0, 0));
-        assertEquals("Пользователь с id = 0 не найден", exception.getParameter());
+        assertEquals("Пользователи с идентификаторами id = 0 и id = 0 не найдены", exception.getParameter());
     }
 
     @Test
@@ -209,7 +205,6 @@ class UserControllerTest {
                 .login("Santa")
                 .name("Санта Клаус")
                 .birthday(LocalDate.of(2021, 1, 1))
-                .friends(new HashSet<>())
                 .build();
         controller.create(user);
         controller.create(user1);
@@ -226,7 +221,6 @@ class UserControllerTest {
                 .login("Santa")
                 .name("Санта Клаус")
                 .birthday(LocalDate.of(2021, 1, 1))
-                .friends(new HashSet<>())
                 .build();
         controller.create(user);
         controller.create(user1);
@@ -244,14 +238,12 @@ class UserControllerTest {
                 .login("Santa")
                 .name("Санта Клаус")
                 .birthday(LocalDate.of(2021, 1, 1))
-                .friends(new HashSet<>())
                 .build();
         User user2 = User.builder()
                 .email("Santa@mail.com")
                 .login("Santa")
                 .name("Санта Клаус")
                 .birthday(LocalDate.of(2021, 1, 1))
-                .friends(new HashSet<>())
                 .build();
 
         controller.create(user);
@@ -274,14 +266,12 @@ class UserControllerTest {
                 .login("Santa")
                 .name("Санта Клаус")
                 .birthday(LocalDate.of(2021, 1, 1))
-                .friends(new HashSet<>())
                 .build();
         User user2 = User.builder()
                 .email("Santa@mail.com")
                 .login("Santa")
                 .name("Санта Клаус")
                 .birthday(LocalDate.of(2021, 1, 1))
-                .friends(new HashSet<>())
                 .build();
 
         controller.create(user);
@@ -297,17 +287,13 @@ class UserControllerTest {
                 .login("Santa")
                 .name("Санта")
                 .birthday(LocalDate.of(2000, Month.DECEMBER, 6))
-                .friends(new HashSet<>())
                 .build();
-        HashSet<Integer> user1Friends = new HashSet<>();
-        user1Friends.add(3);
-        user1.setFriends(user1Friends);
+
         User user2 = User.builder()
                 .email("Santa@mail.r")
                 .login("Santa")
                 .name("Санта")
                 .birthday(LocalDate.of(2000, Month.DECEMBER, 6))
-                .friends(new HashSet<>())
                 .build();
         controller.create(user);
         controller.create(user1);
@@ -330,14 +316,12 @@ class UserControllerTest {
                 .login("Santa")
                 .name("Санта Клаус")
                 .birthday(LocalDate.of(2021, 1, 1))
-                .friends(new HashSet<>())
                 .build();
         User user2 = User.builder()
                 .email("Santa@mail.com")
                 .login("Santa")
                 .name("Санта Клаус")
                 .birthday(LocalDate.of(2021, 1, 1))
-                .friends(new HashSet<>())
                 .build();
         controller.create(user);
         controller.create(user1);

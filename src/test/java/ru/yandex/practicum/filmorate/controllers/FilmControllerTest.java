@@ -37,8 +37,8 @@ class FilmControllerTest {
 
     @BeforeEach
     void beforeEach() throws IOException {
-        jdbcTemplate.update(Files.readString(Paths.get("src/test/java/TestResources/schema1.sql")));
-        jdbcTemplate.update(Files.readString(Paths.get("src/test/java/TestResources/data1.sql")));
+        jdbcTemplate.update(Files.readString(Paths.get("src/test/java/resources/schema1.sql")));
+        jdbcTemplate.update(Files.readString(Paths.get("src/test/java/resources/data1.sql")));
         film = Film.builder()
                 .name("Титаник")
                 .description("Фильм про лодку")
@@ -47,14 +47,12 @@ class FilmControllerTest {
                 .rate(1)
                 .mpa(new Mpa(1, "G"))
                 .genres(new LinkedHashSet<>())
-                .usersLikes(new HashSet<>())
                 .build();
         user = User.builder()
                 .email("Santa@mail.ru")
                 .login("Santa")
                 .name("Санта")
                 .birthday(LocalDate.of(2000, Month.DECEMBER, 6))
-                .friends(new HashSet<>())
                 .build();
     }
 
@@ -135,11 +133,10 @@ class FilmControllerTest {
                 .rate(1)
                 .mpa(new Mpa(1, "G"))
                 .genres(new LinkedHashSet<>())
-                .usersLikes(new HashSet<>())
                 .build();
 
         controller.create(film);
-        controller.updateOrCreate(film1);
+        controller.update(film1);
         assertTrue(controller.findAll().contains(film1));
     }
 
@@ -155,7 +152,7 @@ class FilmControllerTest {
 
         controller.create(film);
         final ValidationException exception = assertThrows(ValidationException.class,
-                () -> controller.updateOrCreate(film1));
+                () -> controller.update(film1));
         assertEquals("Название не может быть пустым.", exception.getParameter());
     }
 
@@ -173,7 +170,7 @@ class FilmControllerTest {
 
         controller.create(film);
         final ValidationException exception = assertThrows(ValidationException.class,
-                () -> controller.updateOrCreate(film1));
+                () -> controller.update(film1));
         assertEquals("Максимальная длина описания — 200 символов.", exception.getParameter());
     }
 
@@ -189,7 +186,7 @@ class FilmControllerTest {
 
         controller.create(film);
         final ValidationException exception = assertThrows(ValidationException.class,
-                () -> controller.updateOrCreate(film1));
+                () -> controller.update(film1));
         assertEquals("Дата релиза — не раньше 28.12.1895.", exception.getParameter());
     }
 
@@ -205,7 +202,7 @@ class FilmControllerTest {
 
         controller.create(film);
         final ValidationException exception = assertThrows(ValidationException.class,
-                () -> controller.updateOrCreate(film1));
+                () -> controller.update(film1));
         assertEquals("Продолжительность фильма должна быть положительной.", exception.getParameter());
     }
 
@@ -223,7 +220,7 @@ class FilmControllerTest {
         userDbStorage.create(user);
         final DataNotFoundException exception = assertThrows(DataNotFoundException.class,
                 () -> controller.addLike(0, user.getId()));
-        assertEquals("Фильм с id = 0 не найден", exception.getParameter());
+        assertEquals("Фильм с id = 0 или пользоватль с id = 1 не найдены", exception.getParameter());
     }
 
     @Test
@@ -242,7 +239,7 @@ class FilmControllerTest {
         controller.addLike(film.getId(), user.getId());
         assertTrue(likesDao.getFilmLikes(film.getId()).contains(user));
         controller.deleteLike(film.getId(), user.getId());
-        assertFalse(film.getUsersLikes().contains(user.getId()));
+        assertFalse(likesDao.getFilmLikes(film.getId()).contains(user));
     }
 
     @Test
@@ -251,10 +248,10 @@ class FilmControllerTest {
         userDbStorage.create(user);
         controller.addLike(film.getId(), user.getId());
         assertTrue(likesDao.getFilmLikes(film.getId()).contains(user));
-        final DataNotFoundException exception = assertThrows(DataNotFoundException.class,
+        final ValidationException exception = assertThrows(ValidationException.class,
                 () -> controller.deleteLike(0, user.getId()));
         assertTrue(likesDao.getFilmLikes(film.getId()).contains(user));
-        assertEquals("Фильм с id = 0 не найден", exception.getParameter());
+        assertEquals("Вы уже убрали лайк с фильма id = 0", exception.getParameter());
     }
 
     @Test
@@ -271,11 +268,6 @@ class FilmControllerTest {
 
     @Test
     void popularFilms() {
-        Set<Integer> likesFilm1 = new HashSet<>();
-        likesFilm1.add(1);
-        likesFilm1.add(2);
-        likesFilm1.add(3);
-        film.setUsersLikes(likesFilm1);
         Film film2 = Film.builder()
                 .name("Тит")
                 .description("Фильм про лодку")
@@ -284,12 +276,8 @@ class FilmControllerTest {
                 .rate(1)
                 .mpa(new Mpa(1, "G"))
                 .genres(new LinkedHashSet<>())
-                .usersLikes(new HashSet<>())
                 .build();
-        Set<Integer> likesFilm2 = new HashSet<>();
-        likesFilm2.add(1);
-        likesFilm2.add(2);
-        film2.setUsersLikes(likesFilm2);
+
         Film film3 = Film.builder()
                 .name("Тита")
                 .description("Фильм про лодку")
@@ -298,17 +286,13 @@ class FilmControllerTest {
                 .rate(1)
                 .mpa(new Mpa(1, "G"))
                 .genres(new LinkedHashSet<>())
-                .usersLikes(new HashSet<>())
                 .build();
-        Set<Integer> likesFilm3 = new HashSet<>();
-        likesFilm3.add(1);
-        film3.setUsersLikes(likesFilm3);
+
         User user2 = User.builder()
                 .email("Sta@mail.ru")
                 .login("Santa")
                 .name("Санта")
                 .birthday(LocalDate.of(2000, Month.DECEMBER, 6))
-                .friends(new HashSet<>())
                 .build();
         User user3 = User.builder()
                 .id(1)
@@ -316,7 +300,6 @@ class FilmControllerTest {
                 .login("Santa")
                 .name("Санта")
                 .birthday(LocalDate.of(0, Month.DECEMBER, 6))
-                .friends(new HashSet<>())
                 .build();
         controller.create(film);
         controller.create(film2);

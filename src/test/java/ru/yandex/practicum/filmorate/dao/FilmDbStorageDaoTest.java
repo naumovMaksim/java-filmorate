@@ -29,8 +29,8 @@ class FilmDbStorageDaoTest {
 
     @BeforeEach
     void beforeEach() throws IOException {
-        jdbcTemplate.update(Files.readString(Paths.get("src/test/java/TestResources/schema1.sql")));
-        jdbcTemplate.update(Files.readString(Paths.get("src/test/java/TestResources/data1.sql")));
+        jdbcTemplate.update(Files.readString(Paths.get("src/test/java/resources/schema1.sql")));
+        jdbcTemplate.update(Files.readString(Paths.get("src/test/java/resources/data1.sql")));
         film = Film.builder()
                 .name("Титаник")
                 .description("Фильм про корабль")
@@ -39,7 +39,6 @@ class FilmDbStorageDaoTest {
                 .rate(1)
                 .mpa(new Mpa(1, "G"))
                 .genres(new LinkedHashSet<>())
-                .usersLikes(new HashSet<>())
                 .build();
         film2 = Film.builder()
                 .name("Кот в сапогах")
@@ -49,7 +48,6 @@ class FilmDbStorageDaoTest {
                 .rate(2)
                 .mpa(new Mpa(1, "G"))
                 .genres(new LinkedHashSet<>())
-                .usersLikes(new HashSet<>())
                 .build();
     }
 
@@ -84,7 +82,6 @@ class FilmDbStorageDaoTest {
                 .rate(2)
                 .mpa(new Mpa(1, "G"))
                 .genres(new LinkedHashSet<>())
-                .usersLikes(new HashSet<>())
                 .build();
         filmDbStorageDao.update(Film.builder()
                 .id(1)
@@ -95,7 +92,6 @@ class FilmDbStorageDaoTest {
                 .rate(2)
                 .mpa(new Mpa(1, "G"))
                 .genres(new LinkedHashSet<>())
-                .usersLikes(new HashSet<>())
                 .build());
 
         assertEquals(film1, filmDbStorageDao.findFilm(1));
