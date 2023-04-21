@@ -19,14 +19,14 @@ public class GenereDao implements GenreStorage {
 
     @Override
     public Collection<Genere> getAllGeners() {
-        String sql = "SELECT * FROM Genere" ;
+        String sql = "SELECT * FROM Genere";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> Genere.makeGenere(rs));
     }
 
     @Override
     public Genere getGenereById(int id) {
-        String sql = "SELECT * FROM GENERE WHERE genere_id = ?" ;
+        String sql = "SELECT * FROM GENERE WHERE genere_id = ?";
 
         try {
             Genere genere = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> Genere.makeGenere(rs), id);

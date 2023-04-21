@@ -26,7 +26,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User findUser(int id) {
-        String sql = "SELECT * FROM USERS where user_id = ?" ;
+        String sql = "SELECT * FROM USERS where user_id = ?";
 
         try {
             User user = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> User.makeUser(rs), id);
@@ -41,14 +41,14 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Collection<User> findAll() {
-        String sql = "SELECT * FROM USERS" ;
+        String sql = "SELECT * FROM USERS";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> User.makeUser(rs));
     }
 
     @Override
     public User create(User user) {
-        String sql = "INSERT INTO USERS (email, login, name, birthday) VALUES (?,?,?,?)" ;
+        String sql = "INSERT INTO USERS (email, login, name, birthday) VALUES (?,?,?,?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -70,7 +70,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User update(User user) {
-        String sql = "UPDATE USERS SET EMAIL = ?, LOGIN = ?, NAME = ?, BIRTHDAY = ? WHERE USER_ID = ?" ;
+        String sql = "UPDATE USERS SET EMAIL = ?, LOGIN = ?, NAME = ?, BIRTHDAY = ? WHERE USER_ID = ?";
 
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());

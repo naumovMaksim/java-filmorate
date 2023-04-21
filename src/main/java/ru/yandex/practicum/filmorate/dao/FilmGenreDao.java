@@ -19,15 +19,14 @@ public class FilmGenreDao implements FilmGenreService {
     @Override
     public LinkedHashSet<Genere> getFilmGenre(int filmId) {
         String sql = "SELECT g.genere_id, g.name FROM GENRE_FILM AS fg " +
-                "LEFT JOIN GENERE AS g ON fg.genere_id = g.genere_id WHERE fg.film_id = ?" ;
+                "LEFT JOIN GENERE AS g ON fg.genere_id = g.genere_id WHERE fg.film_id = ?";
         Collection<Genere> generes = jdbcTemplate.query(sql, (rs, rowNum) -> Genere.makeGenere(rs), filmId);
         return new LinkedHashSet<>(generes);
     }
 
     @Override
     public void addGenreToFilm(Film film) {
-        String sqlGener = "INSERT INTO GENRE_FILM (GENERE_ID, film_id) VALUES (?,?)" ;//я так и не разобрался как мне добавить что фильму принадлежит определенный жанр в таблице GENRE_FILM без этого метода, а для работы с жанрами у меня таблица Genere и GenreDao
-
+        String sqlGener = "INSERT INTO GENRE_FILM (GENERE_ID, film_id) VALUES (?,?)";
         LinkedHashSet<Genere> geners = film.getGenres();
 
         for (Genere genre : geners) {
@@ -37,7 +36,7 @@ public class FilmGenreDao implements FilmGenreService {
 
     @Override
     public void deleteAllFilmGenres(Film film) {
-        String sql = "DELETE FROM GENRE_FILM WHERE FILM_ID = ?" ;
+        String sql = "DELETE FROM GENRE_FILM WHERE FILM_ID = ?";
 
         jdbcTemplate.update(sql, film.getId());
     }

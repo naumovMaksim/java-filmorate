@@ -32,7 +32,7 @@ public class FilmDbStorageDao implements FilmStorage {
         String sql = "SELECT FILM_ID, f.NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATE, MPA_ID, m.NAME AS mpa_name " +
                 "FROM FILMS AS f " +
                 "LEFT JOIN MPA AS m ON f.MPA = m.MPA_ID " +
-                "WHERE FILM_ID = ?" ;
+                "WHERE FILM_ID = ?";
 
         try {
             Film film = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeFilm(rs), id);
@@ -48,13 +48,13 @@ public class FilmDbStorageDao implements FilmStorage {
     public Collection<Film> findAll() {
         String sql = "SELECT FILM_ID, f.NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATE, MPA_ID, m.NAME AS mpa_name " +
                 "FROM FILMS AS f " +
-                "LEFT JOIN MPA AS m ON f.MPA = m.MPA_ID" ;
+                "LEFT JOIN MPA AS m ON f.MPA = m.MPA_ID";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs));
     }
 
     @Override
     public Film create(Film film) {
-        String sql = "INSERT INTO FILMS (name, description, release_date, duration, rate, mpa) VALUES (?,?,?,?,?,?)" ;
+        String sql = "INSERT INTO FILMS (name, description, release_date, duration, rate, mpa) VALUES (?,?,?,?,?,?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -75,7 +75,7 @@ public class FilmDbStorageDao implements FilmStorage {
     @Override
     public void update(Film film) {
         String sql = "UPDATE FILMS SET name = ?, description = ?, release_date = ?" +
-                ", duration = ?, rate = ?, mpa = ?  WHERE film_id = ?" ;
+                ", duration = ?, rate = ?, mpa = ?  WHERE film_id = ?";
 
         int update = jdbcTemplate.update(sql, film.getName(), film.getDescription(),
                 film.getReleaseDate(), film.getDuration(), film.getRate(), film.getMpa().getId(), film.getId());
@@ -91,7 +91,7 @@ public class FilmDbStorageDao implements FilmStorage {
                 "FROM FILMS AS f " +
                 "LEFT JOIN MPA AS m ON f.MPA = m.MPA_ID " +
                 "LEFT JOIN FILM_LIKES AS fl ON f.FILM_ID = fl.FILM_ID " +
-                "GROUP BY f.FILM_ID ORDER BY COUNT(fl.FILM_ID) desc LIMIT ?" ;
+                "GROUP BY f.FILM_ID ORDER BY COUNT(fl.FILM_ID) desc LIMIT ?";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), limit);
     }
 

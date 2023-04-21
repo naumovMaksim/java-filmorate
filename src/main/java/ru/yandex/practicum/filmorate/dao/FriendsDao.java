@@ -22,7 +22,7 @@ public class FriendsDao implements FriendsStorage {
     public void addFriend(int userId, int friendId) {
         String sql = "MERGE INTO USER_FRIENDS AS uf USING (VALUES (?,?)) S(friend_id, user_id) " +
                 "ON uf.FRIEND_ID = S.friend_id AND uf.USER_ID = S.user_id " +
-                "WHEN NOT MATCHED THEN INSERT VALUES (S.friend_id, S.user_id)" ;
+                "WHEN NOT MATCHED THEN INSERT VALUES (S.friend_id, S.user_id)";
         try {
             jdbcTemplate.update(sql, friendId, userId);
         } catch (DataIntegrityViolationException e) {
@@ -36,7 +36,7 @@ public class FriendsDao implements FriendsStorage {
     public void deleteFriend(int userId, int friendId) {
         String sql = "MERGE INTO USER_FRIENDS AS uf USING (VALUES (?,?)) S(friend_id, user_id) " +
                 "ON uf.FRIEND_ID = S.friend_id AND uf.USER_ID = S.user_id " +
-                "WHEN MATCHED THEN DELETE" ;
+                "WHEN MATCHED THEN DELETE";
 
         try {
             jdbcTemplate.update(sql, friendId, userId);
@@ -50,7 +50,7 @@ public class FriendsDao implements FriendsStorage {
     @Override
     public Collection<User> getUserFriends(int id) {
         String sql = "SELECT U.USER_ID, U.EMAIL, U.LOGIN, U.NAME, U.BIRTHDAY FROM USER_FRIENDS " +
-                "LEFT JOIN USERS U on U.USER_ID = USER_FRIENDS.FRIEND_ID WHERE USER_FRIENDS.USER_ID = ?" ;
+                "LEFT JOIN USERS U on U.USER_ID = USER_FRIENDS.FRIEND_ID WHERE USER_FRIENDS.USER_ID = ?";
         return jdbcTemplate.query(sql, (rs, rowNum) -> User.makeUser(rs), id);
     }
 
@@ -59,7 +59,7 @@ public class FriendsDao implements FriendsStorage {
         String sql = "SELECT u.USER_ID, u.EMAIL, u.LOGIN, u.NAME, u.BIRTHDAY " +
                 "FROM USER_FRIENDS AS uf " +
                 "INNER JOIN USERS u on uf.FRIEND_ID = u.USER_ID " +
-                "WHERE uf.USER_ID = ? AND uf.FRIEND_ID IN (SELECT FRIEND_ID FROM USER_FRIENDS WHERE USER_ID = ?)" ;
+                "WHERE uf.USER_ID = ? AND uf.FRIEND_ID IN (SELECT FRIEND_ID FROM USER_FRIENDS WHERE USER_ID = ?)";
 
         try {
             return jdbcTemplate.query(sql, (rs, rowNum) -> User.makeUser(rs), friendId, userId);
