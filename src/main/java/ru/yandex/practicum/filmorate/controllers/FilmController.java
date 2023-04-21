@@ -44,27 +44,24 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film updateOrCreate(@RequestBody Film film) {
+    public Film update(@RequestBody Film film) {
         log.debug("Получен /PUT запрос на изменение данных фильма: {}", film);
-        Film film1 = filmService.updateFilm(film);
-        log.debug("Данные фильма изменены: {}", film1);
-        return film1;
+        filmService.updateFilm(film);
+        Film updatedFilm = filmService.findFilm(film.getId());
+        log.debug("Данные фильма изменены: {}", updatedFilm);
+        return updatedFilm;
     }
 
     @PutMapping("/{filmId}/like/{userId}")
     public void addLike(@PathVariable int filmId, @PathVariable int userId) {
         log.debug("Пришел /PUT запрос на лайк фильма с id {}", filmId);
         filmService.addLike(filmId, userId);
-        Film film = filmService.findFilm(filmId);
-        log.debug("Ответ отправлен {}", film.getUsersLikes().contains(userId));
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
     public void deleteLike(@PathVariable int filmId, @PathVariable int userId) {
         log.debug("Пришел запрос на удаление лайка с фильма с id {}", filmId);
         filmService.deleteLike(filmId, userId);
-        Film film = filmService.findFilm(filmId);
-        log.debug("Ответ отправлен {}", !film.getUsersLikes().contains(userId));
     }
 
     @GetMapping("/popular")
@@ -77,7 +74,10 @@ public class FilmController {
 }
 //{
 //        "name": "Титаник",
-//        "description": "что то",
-//        "releaseDate": "2001-12-25",
-//        "duration": "5"
+//        "description": "Фильм про корабль",
+//        "releaseDate": "1999-12-12",
+//        "duration": 60,
+//        "rate": 2,
+//        "mpa": {"id": 1},
+//        "genres": [{"id": 1}]
 //        }

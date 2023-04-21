@@ -1,46 +1,58 @@
 package ru.yandex.practicum.filmorate.controllers;
 
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
+import ru.yandex.practicum.filmorate.dao.LikesDao;
+import ru.yandex.practicum.filmorate.dao.UserDbStorage;
 import ru.yandex.practicum.filmorate.exceptions.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.film.FilmService;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class FilmControllerTest {
-    Film film;
-    User user;
-    InMemoryFilmStorage inMemoryFilmStorage = new InMemoryFilmStorage();
-    InMemoryUserStorage inMemoryUserStorage = new InMemoryUserStorage();
-    FilmService filmService = new FilmService(inMemoryFilmStorage, inMemoryUserStorage);
-    FilmController controller = new FilmController(filmService);
+    private final JdbcTemplate jdbcTemplate;
+    private Film film;
+    private User user;
+    private final FilmController controller;
+    private final UserDbStorage userDbStorage;
+    private final LikesDao likesDao;
 
     @BeforeEach
-    void beforeEach() {
+    void beforeEach() throws IOException {
+        jdbcTemplate.update(Files.readString(Paths.get("src/test/java/resources/schema1.sql")));
+        jdbcTemplate.update(Files.readString(Paths.get("src/test/java/resources/data1.sql")));
         film = Film.builder()
-                .id(1)
                 .name("Титаник")
                 .description("Фильм про лодку")
                 .releaseDate(LocalDate.of(1998, Month.FEBRUARY, 20))
                 .duration(196)
-                .usersLikes(new HashSet<>())
+                .rate(1)
+                .mpa(new Mpa(1, "G"))
+                .genres(new LinkedHashSet<>())
                 .build();
         user = User.builder()
-                .id(1)
                 .email("Santa@mail.ru")
                 .login("Santa")
                 .name("Санта")
-                .birthday(LocalDate.of(0, Month.DECEMBER, 6))
-                .friends(new HashSet<>())
+                .birthday(LocalDate.of(2000, Month.DECEMBER, 6))
                 .build();
     }
 
@@ -56,7 +68,7 @@ class FilmControllerTest {
         assertEquals(film, controller.findFilm(film.getId()));
         final DataNotFoundException exception = assertThrows(DataNotFoundException.class,
                 () -> controller.findFilm(0));
-        assertEquals("Фильм не найден.", exception.getParameter());
+        assertEquals("Фильм с id = 0 не найден", exception.getParameter());
     }
 
     @Test
@@ -73,7 +85,7 @@ class FilmControllerTest {
     @Test
     void create() {
         controller.create(film);
-        assertTrue(controller.findAll().contains(film));
+        assertEquals(film, controller.findFilm(1));
     }
 
     @Test
@@ -114,14 +126,17 @@ class FilmControllerTest {
     void update() {
         Film film1 = Film.builder()
                 .id(1)
-                .name("Титаник")
-                .description("Фильм про лодку от крутого режисёра")
+                .name("Кот в сапогах")
+                .description("Фильм про кота")
                 .releaseDate(LocalDate.of(1998, Month.FEBRUARY, 20))
                 .duration(196)
+                .rate(1)
+                .mpa(new Mpa(1, "G"))
+                .genres(new LinkedHashSet<>())
                 .build();
 
         controller.create(film);
-        controller.updateOrCreate(film1);
+        controller.update(film1);
         assertTrue(controller.findAll().contains(film1));
     }
 
@@ -137,7 +152,7 @@ class FilmControllerTest {
 
         controller.create(film);
         final ValidationException exception = assertThrows(ValidationException.class,
-                () -> controller.updateOrCreate(film1));
+                () -> controller.update(film1));
         assertEquals("Название не может быть пустым.", exception.getParameter());
     }
 
@@ -155,7 +170,7 @@ class FilmControllerTest {
 
         controller.create(film);
         final ValidationException exception = assertThrows(ValidationException.class,
-                () -> controller.updateOrCreate(film1));
+                () -> controller.update(film1));
         assertEquals("Максимальная длина описания — 200 символов.", exception.getParameter());
     }
 
@@ -171,7 +186,7 @@ class FilmControllerTest {
 
         controller.create(film);
         final ValidationException exception = assertThrows(ValidationException.class,
-                () -> controller.updateOrCreate(film1));
+                () -> controller.update(film1));
         assertEquals("Дата релиза — не раньше 28.12.1895.", exception.getParameter());
     }
 
@@ -187,114 +202,117 @@ class FilmControllerTest {
 
         controller.create(film);
         final ValidationException exception = assertThrows(ValidationException.class,
-                () -> controller.updateOrCreate(film1));
+                () -> controller.update(film1));
         assertEquals("Продолжительность фильма должна быть положительной.", exception.getParameter());
     }
 
     @Test
     void addLike() {
         controller.create(film);
-        inMemoryUserStorage.create(user);
-        filmService.addLike(film.getId(), user.getId());
-        assertTrue(film.getUsersLikes().contains(user.getId()));
+        userDbStorage.create(user);
+        controller.addLike(film.getId(), user.getId());
+        assertEquals(List.of(user), likesDao.getFilmLikes(film.getId()));
     }
 
     @Test
     void addLikeWithWrongFilmData() {
         controller.create(film);
-        inMemoryUserStorage.create(user);
+        userDbStorage.create(user);
         final DataNotFoundException exception = assertThrows(DataNotFoundException.class,
-                () -> filmService.addLike(0, user.getId()));
-        assertEquals("Фильм не найден.", exception.getParameter());
+                () -> controller.addLike(0, user.getId()));
+        assertEquals("Фильм с id = 0 или пользоватль с id = 1 не найдены", exception.getParameter());
     }
 
     @Test
     void addLikeWithWrongUserData() {
         controller.create(film);
-        inMemoryUserStorage.create(user);
+        userDbStorage.create(user);
         final DataNotFoundException exception = assertThrows(DataNotFoundException.class,
-                () -> filmService.addLike(film.getId(), 0));
-        assertEquals("Пользователь не найден.", exception.getParameter());
+                () -> controller.addLike(film.getId(), 0));
+        assertEquals("Пользователь с id = 0 не найден", exception.getParameter());
     }
 
     @Test
     void deleteLike() {
         controller.create(film);
-        inMemoryUserStorage.create(user);
-        filmService.addLike(film.getId(), user.getId());
-        assertTrue(film.getUsersLikes().contains(user.getId()));
+        userDbStorage.create(user);
+        controller.addLike(film.getId(), user.getId());
+        assertTrue(likesDao.getFilmLikes(film.getId()).contains(user));
         controller.deleteLike(film.getId(), user.getId());
-        assertFalse(film.getUsersLikes().contains(user.getId()));
+        assertFalse(likesDao.getFilmLikes(film.getId()).contains(user));
     }
 
     @Test
     void deleteLikeWithWrongFilmData() {
         controller.create(film);
-        inMemoryUserStorage.create(user);
-        filmService.addLike(film.getId(), user.getId());
-        assertTrue(film.getUsersLikes().contains(user.getId()));
-        final DataNotFoundException exception = assertThrows(DataNotFoundException.class,
+        userDbStorage.create(user);
+        controller.addLike(film.getId(), user.getId());
+        assertTrue(likesDao.getFilmLikes(film.getId()).contains(user));
+        final ValidationException exception = assertThrows(ValidationException.class,
                 () -> controller.deleteLike(0, user.getId()));
-        assertTrue(film.getUsersLikes().contains(user.getId()));
-        assertEquals("Фильм не найден.", exception.getParameter());
+        assertTrue(likesDao.getFilmLikes(film.getId()).contains(user));
+        assertEquals("Вы уже убрали лайк с фильма id = 0", exception.getParameter());
     }
 
     @Test
     void deleteLikeWithWrongUserData() {
         controller.create(film);
-        inMemoryUserStorage.create(user);
-        filmService.addLike(film.getId(), user.getId());
-        assertTrue(film.getUsersLikes().contains(user.getId()));
+        userDbStorage.create(user);
+        controller.addLike(film.getId(), user.getId());
+        assertTrue(likesDao.getFilmLikes(film.getId()).contains(user));
         final DataNotFoundException exception = assertThrows(DataNotFoundException.class,
                 () -> controller.deleteLike(film.getId(), 0));
-        assertTrue(film.getUsersLikes().contains(user.getId()));
-        assertEquals("Пользователь не найден.", exception.getParameter());
+        assertTrue(likesDao.getFilmLikes(film.getId()).contains(user));
+        assertEquals("Пользователь с id = 0 не найден", exception.getParameter());
     }
 
     @Test
     void popularFilms() {
         Film film2 = Film.builder()
-                .name("Ти")
+                .name("Тит")
                 .description("Фильм про лодку")
                 .releaseDate(LocalDate.of(1998, Month.FEBRUARY, 20))
                 .duration(196)
-                .usersLikes(new HashSet<>())
+                .rate(1)
+                .mpa(new Mpa(1, "G"))
+                .genres(new LinkedHashSet<>())
                 .build();
+
         Film film3 = Film.builder()
-                .name("Титан")
+                .name("Тита")
                 .description("Фильм про лодку")
                 .releaseDate(LocalDate.of(1998, Month.FEBRUARY, 20))
                 .duration(196)
-                .usersLikes(new HashSet<>())
+                .rate(1)
+                .mpa(new Mpa(1, "G"))
+                .genres(new LinkedHashSet<>())
                 .build();
+
         User user2 = User.builder()
-                .id(1)
-                .email("Santa@mail.ru")
+                .email("Sta@mail.ru")
                 .login("Santa")
                 .name("Санта")
-                .birthday(LocalDate.of(0, Month.DECEMBER, 6))
-                .friends(new HashSet<>())
+                .birthday(LocalDate.of(2000, Month.DECEMBER, 6))
                 .build();
         User user3 = User.builder()
                 .id(1)
-                .email("Santa@mail.ru")
+                .email("S@mail.ru")
                 .login("Santa")
                 .name("Санта")
                 .birthday(LocalDate.of(0, Month.DECEMBER, 6))
-                .friends(new HashSet<>())
                 .build();
         controller.create(film);
         controller.create(film2);
         controller.create(film3);
-        inMemoryUserStorage.create(user);
-        inMemoryUserStorage.create(user2);
-        inMemoryUserStorage.create(user3);
-        filmService.addLike(film.getId(), user.getId());
-        filmService.addLike(film.getId(), user2.getId());
-        filmService.addLike(film.getId(), user3.getId());
-        filmService.addLike(film2.getId(), user.getId());
-        filmService.addLike(film2.getId(), user2.getId());
-        filmService.addLike(film3.getId(), user.getId());
+        userDbStorage.create(user);
+        userDbStorage.create(user2);
+        userDbStorage.create(user3);
+        controller.addLike(film.getId(), user.getId());
+        controller.addLike(film.getId(), user2.getId());
+        controller.addLike(film.getId(), user3.getId());
+        controller.addLike(film2.getId(), user.getId());
+        controller.addLike(film2.getId(), user2.getId());
+        controller.addLike(film3.getId(), user.getId());
         LinkedList<Film> films = new LinkedList<>();
         films.addFirst(film);
         films.addLast(film2);

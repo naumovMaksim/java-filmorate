@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.minidev.json.annotate.JsonIgnore;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -12,8 +11,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Data
 @Builder
@@ -30,23 +28,20 @@ public class Film {
     private LocalDate releaseDate;
     @Min(1)
     private int duration;
-    @JsonIgnore
-    private Set<Integer> usersLikes = new HashSet<>();
+    @NotNull
+    private int rate;
+    private Mpa mpa;
+    private LinkedHashSet<Genere> genres = new LinkedHashSet<>();
 
-    public Film(@Valid int id,@Valid String name,@Valid String description,@Valid LocalDate releaseDate,@Valid int duration) {
+    public Film(@Valid int id, @Valid String name, @Valid String description, @Valid LocalDate releaseDate,
+                @Valid int duration, @Valid int rating, Mpa mpa) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
-        this.usersLikes = new HashSet<>();
-    }
-
-    public void setUsersLikes(User user) {
-        usersLikes.add(user.getId());
-    }
-
-    public void deleteUsersLikes(User user) {
-        usersLikes.remove(user.getId());
+        this.rate = rating;
+        this.mpa = mpa;
+        this.genres = new LinkedHashSet<>();
     }
 }

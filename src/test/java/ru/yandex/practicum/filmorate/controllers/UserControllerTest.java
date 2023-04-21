@@ -1,34 +1,44 @@
 package ru.yandex.practicum.filmorate.controllers;
 
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
+import ru.yandex.practicum.filmorate.dao.FriendsDao;
 import ru.yandex.practicum.filmorate.exceptions.DataNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.user.UserService;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class UserControllerTest {
-    InMemoryUserStorage inMemoryUserStorage = new InMemoryUserStorage();
-    UserService userService = new UserService(inMemoryUserStorage);
-    UserController controller = new UserController(userService);
     User user;
+    private final JdbcTemplate jdbcTemplate;
+    private final UserController controller;
+    private final FriendsDao friendsDao;
 
     @BeforeEach
-    void beforeEach() {
+    void beforeEach() throws IOException {
+        jdbcTemplate.update(Files.readString(Paths.get("src/test/java/resources/schema1.sql")));
+        jdbcTemplate.update(Files.readString(Paths.get("src/test/java/resources/data1.sql")));
         user = User.builder()
-                .id(1)
                 .email("Santa@mail.ru")
                 .login("Santa")
                 .name("Санта")
-                .birthday(LocalDate.of(0, Month.DECEMBER, 6))
-                .friends(new HashSet<>())
+                .birthday(LocalDate.of(2000, Month.DECEMBER, 6))
                 .build();
     }
 
@@ -54,7 +64,7 @@ class UserControllerTest {
         controller.create(user);
         final DataNotFoundException exception = assertThrows(DataNotFoundException.class,
                 () -> controller.findUser(0));
-        assertEquals("Пользователь не найден.", exception.getParameter());
+        assertEquals("Пользователь с id = 0 не найден", exception.getParameter());
     }
 
     @Test
@@ -100,10 +110,10 @@ class UserControllerTest {
     void update() {
         User user1 = User.builder()
                 .id(1)
-                .email("Santa@mail.ru")
+                .email("Sa@mail.ru")
                 .login("Santa")
-                .name("Санта Клаус")
-                .birthday(LocalDate.of(0, Month.DECEMBER, 6))
+                .name("Санта")
+                .birthday(LocalDate.of(2000, Month.DECEMBER, 6))
                 .build();
 
         controller.create(user);
@@ -166,13 +176,11 @@ class UserControllerTest {
                 .login("Santa")
                 .name("Санта Клаус")
                 .birthday(LocalDate.of(2021, 1, 1))
-                .friends(new HashSet<>())
                 .build();
         controller.create(user);
         controller.create(user1);
         controller.addFriend(user.getId(), user1.getId());
-        assertTrue(user.getFriends().contains(user1.getId()));
-        assertTrue(user1.getFriends().contains(user.getId()));
+        assertTrue(friendsDao.getUserFriends(user.getId()).contains(user1));
     }
 
     @Test
@@ -182,13 +190,12 @@ class UserControllerTest {
                 .login("Santa")
                 .name("Санта Клаус")
                 .birthday(LocalDate.of(2021, 1, 1))
-                .friends(new HashSet<>())
                 .build();
         controller.create(user);
         controller.create(user1);
         final DataNotFoundException exception = assertThrows(DataNotFoundException.class,
                 () -> controller.addFriend(0, 0));
-        assertEquals("Пользователь не найден.", exception.getParameter());
+        assertEquals("Пользователи с идентификаторами id = 0 и id = 0 не найдены", exception.getParameter());
     }
 
     @Test
@@ -198,16 +205,13 @@ class UserControllerTest {
                 .login("Santa")
                 .name("Санта Клаус")
                 .birthday(LocalDate.of(2021, 1, 1))
-                .friends(new HashSet<>())
                 .build();
         controller.create(user);
         controller.create(user1);
         controller.addFriend(user.getId(), user1.getId());
-        assertTrue(user.getFriends().contains(user1.getId()));
-        assertTrue(user1.getFriends().contains(user.getId()));
+        assertTrue(friendsDao.getUserFriends(user.getId()).contains(user1));
         controller.deleteFriend(user.getId(), user1.getId());
-        assertFalse(user.getFriends().contains(user1.getId()));
-        assertFalse(user1.getFriends().contains(user.getId()));
+        assertFalse(friendsDao.getUserFriends(user.getId()).contains(user1));
     }
 
     @Test
@@ -217,16 +221,14 @@ class UserControllerTest {
                 .login("Santa")
                 .name("Санта Клаус")
                 .birthday(LocalDate.of(2021, 1, 1))
-                .friends(new HashSet<>())
                 .build();
         controller.create(user);
         controller.create(user1);
         controller.addFriend(user.getId(), user1.getId());
-        assertTrue(user.getFriends().contains(user1.getId()));
-        assertTrue(user1.getFriends().contains(user.getId()));
+        assertTrue(friendsDao.getUserFriends(user.getId()).contains(user1));
         final DataNotFoundException exception = assertThrows(DataNotFoundException.class,
                 () -> controller.deleteFriend(1, 0));
-        assertEquals("Пользователь не найден.", exception.getParameter());
+        assertEquals("Такого пользователя нет у вас в друзьях.", exception.getParameter());
     }
 
     @Test
@@ -236,14 +238,12 @@ class UserControllerTest {
                 .login("Santa")
                 .name("Санта Клаус")
                 .birthday(LocalDate.of(2021, 1, 1))
-                .friends(new HashSet<>())
                 .build();
         User user2 = User.builder()
                 .email("Santa@mail.com")
                 .login("Santa")
                 .name("Санта Клаус")
                 .birthday(LocalDate.of(2021, 1, 1))
-                .friends(new HashSet<>())
                 .build();
 
         controller.create(user);
@@ -251,8 +251,8 @@ class UserControllerTest {
         controller.create(user2);
         controller.addFriend(user.getId(), user1.getId());
         controller.addFriend(user.getId(), user2.getId());
-        assertTrue(user.getFriends().contains(user1.getId()));
-        assertTrue(user.getFriends().contains(user2.getId()));
+        assertTrue(friendsDao.getUserFriends(user.getId()).contains(user1));
+        assertTrue(friendsDao.getUserFriends(user.getId()).contains(user2));
         Collection<User> users = new ArrayList<>();
         users.add(user1);
         users.add(user2);
@@ -266,14 +266,12 @@ class UserControllerTest {
                 .login("Santa")
                 .name("Санта Клаус")
                 .birthday(LocalDate.of(2021, 1, 1))
-                .friends(new HashSet<>())
                 .build();
         User user2 = User.builder()
                 .email("Santa@mail.com")
                 .login("Santa")
                 .name("Санта Клаус")
                 .birthday(LocalDate.of(2021, 1, 1))
-                .friends(new HashSet<>())
                 .build();
 
         controller.create(user);
@@ -285,18 +283,17 @@ class UserControllerTest {
     @Test
     void getCommonFriends() {
         User user1 = User.builder()
-                .email("Santa@mail.ru")
+                .email("Sta@mail.ru")
                 .login("Santa")
-                .name("Санта Клаус")
-                .birthday(LocalDate.of(2021, 1, 1))
-                .friends(new HashSet<>())
+                .name("Санта")
+                .birthday(LocalDate.of(2000, Month.DECEMBER, 6))
                 .build();
+
         User user2 = User.builder()
-                .email("Santa@mail.com")
+                .email("Santa@mail.r")
                 .login("Santa")
-                .name("Санта Клаус")
-                .birthday(LocalDate.of(2021, 1, 1))
-                .friends(new HashSet<>())
+                .name("Санта")
+                .birthday(LocalDate.of(2000, Month.DECEMBER, 6))
                 .build();
         controller.create(user);
         controller.create(user1);
@@ -304,9 +301,9 @@ class UserControllerTest {
         controller.addFriend(user.getId(), user1.getId());//0 + 1
         controller.addFriend(user.getId(), user2.getId());//0 + 2
         controller.addFriend(user1.getId(), user2.getId());// 1 + 2
-        assertTrue(user.getFriends().contains(user1.getId()));
-        assertTrue(user.getFriends().contains(user2.getId()));
-        assertTrue(user1.getFriends().contains(user2.getId()));
+        assertTrue(friendsDao.getUserFriends(user.getId()).contains(user1));
+        assertTrue(friendsDao.getUserFriends(user.getId()).contains(user2));
+        assertTrue(friendsDao.getUserFriends(user1.getId()).contains(user2));
         Collection<User> users = new ArrayList<>();
         users.add(user2);
         assertEquals(users, controller.getCommonFriends(user.getId(), user1.getId()));
@@ -319,20 +316,18 @@ class UserControllerTest {
                 .login("Santa")
                 .name("Санта Клаус")
                 .birthday(LocalDate.of(2021, 1, 1))
-                .friends(new HashSet<>())
                 .build();
         User user2 = User.builder()
                 .email("Santa@mail.com")
                 .login("Santa")
                 .name("Санта Клаус")
                 .birthday(LocalDate.of(2021, 1, 1))
-                .friends(new HashSet<>())
                 .build();
         controller.create(user);
         controller.create(user1);
         controller.create(user2);
         controller.addFriend(user.getId(), user1.getId());//0 + 1
-        assertTrue(user.getFriends().contains(user1.getId()));
+        assertTrue(friendsDao.getUserFriends(user.getId()).contains(user1));
         assertEquals(Collections.EMPTY_LIST, controller.getCommonFriends(user.getId(), user2.getId()));
     }
 }

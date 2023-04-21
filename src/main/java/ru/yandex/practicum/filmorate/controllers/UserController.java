@@ -12,6 +12,7 @@ import java.util.Collection;
 @RestController
 @RequestMapping("/users")
 @Slf4j
+
 public class UserController {
     private final UserService userService;
 
@@ -48,7 +49,7 @@ public class UserController {
     public User updateOrCreate(@Valid @RequestBody User user) {
         log.debug("Пришел /PUT запрос на из мнение данных пользователя: {}", user);
         User user1 = userService.updateUser(user);
-        log.debug("Пользователь добавлен: {}", user1);
+        log.debug("Данные пользователя изменены: {}", user1);
         return user1;
     }
 
@@ -56,16 +57,14 @@ public class UserController {
     public void addFriend(@PathVariable int id, @PathVariable int friendId) {
         log.debug("Пришел /POST запрос на добавление друга с id: {} к пользователю с id: {}", friendId, id);
         userService.addFriend(id, friendId);
-        User addingUser = userService.findUser(id);
-        log.debug("Друг c id: {} добавлен: {}", friendId, addingUser.getFriends());
+        log.debug("Друг c id: {} добавлен", friendId);
     }
 
     @DeleteMapping("{id}/friends/{friendId}")
     public void deleteFriend(@PathVariable int id, @PathVariable int friendId) {
         log.debug("Пришел /DELETE запрос на удаление друга с id {} у пользователя с id {}", friendId, id);
         userService.deleteFriend(id, friendId);
-        User addingUser = userService.findUser(id);
-        log.debug("Друг с id: {} удален: {}", friendId, addingUser.getFriends());
+        log.debug("Друг с id: {} удален", friendId);
     }
 
     @GetMapping("/{id}/friends")
@@ -79,15 +78,15 @@ public class UserController {
     @GetMapping("/{id}/friends/common/{otherId}")
     public Collection<User> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
         log.debug("Пришел /GET запрос на получение списка общих друзей пользователя с id {} и пользователя с id {}", id, otherId);
-        Collection <User> users = userService.getCommonFriends(id, otherId);
+        Collection<User> users = userService.getCommonFriends(id, otherId);
         log.debug("Ответ отправлен: {}", users);
         return users;
     }
 }
 // Строки в Json для проверки программы.
 //        {
-//        "email": "dusag@mail.com",
-//        "login": "dartsaider",
-//        "name": "Cat",
-//        "birthday": "2001-12-25"
-//        }
+//                "email": "dusa@gmail.com",
+//                "login": "dusa",
+//                "name": "max",
+//                "birthday": "1999-12-12"
+//         }
