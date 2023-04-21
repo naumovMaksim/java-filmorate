@@ -17,19 +17,18 @@ import java.util.Collection;
 @RequiredArgsConstructor
 @Slf4j
 public class MpaDao implements MpaStorage {
-
     private final JdbcTemplate jdbcTemplate;
 
     @Override
     public Collection<Mpa> getAllMpa() {
-        String sql = "SELECT * FROM MPA";
+        String sql = "SELECT * FROM MPA" ;
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeMpa(rs));
     }
 
     @Override
     public Mpa getMpaById(int id) {
-        String sql = "SELECT * FROM MPA WHERE MPA_ID = ?";
+        String sql = "SELECT * FROM MPA WHERE MPA_ID = ?" ;
 
         try {
             Mpa mpa = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeMpa(rs), id);

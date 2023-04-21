@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.dao.LikesDao;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmGenreService;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.validators.FilmValidator;
@@ -24,15 +25,17 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final LikesDao likesDao;
+    private final FilmGenreService filmGenreService;
 
     @Autowired
     public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage,
-                       @Qualifier("UserDbStorage") UserStorage userStorage, LikesDao likesDao, FilmValidator filmValidator, UserValidator userValidator) {
+                       @Qualifier("UserDbStorage") UserStorage userStorage, LikesDao likesDao, FilmValidator filmValidator, UserValidator userValidator, FilmGenreService filmGenreService) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.likesDao = likesDao;
         this.filmValidator = filmValidator;
         this.userValidator = userValidator;
+        this.filmGenreService = filmGenreService;
     }
 
     public void addLike(int filmId, int userId) {
@@ -57,26 +60,40 @@ public class FilmService {
 
     public Collection<Film> popularFilms(Integer count) {
         final Collection<Film> films = filmStorage.getPopularFilms(count);
+        films.forEach(film -> film.setGenres(filmGenreService.getFilmGenre(film.getId())));
         return films;
     }
 
     public Film findFilm(int id) {
         Film film = filmStorage.findFilm(id);
         filmValidator.validate(film);
+        film.setGenres(filmGenreService.getFilmGenre(id));
         return film;
     }
 
     public Collection<Film> findAll() {
-        return filmStorage.findAll();
+        Collection<Film> films = filmStorage.findAll();
+        for (Film film : films) {
+            film.setGenres(filmGenreService.getFilmGenre(film.getId()));
+        }
+        return films;
     }
 
     public Film create(Film film) {
         filmValidator.validate(film);
-        return filmStorage.create(film);
+        Film createdFilm = filmStorage.create(film);
+        if (createdFilm.getGenres() != null) {
+            filmGenreService.addGenreToFilm(createdFilm);
+        }
+        return createdFilm;
     }
 
     public void updateFilm(Film film) {
         filmValidator.validate(film);
         filmStorage.update(film);
+        if (film.getGenres() != null) {
+            filmGenreService.deleteAllFilmGenres(film);
+            filmGenreService.addGenreToFilm(film);
+        }
     }
 }

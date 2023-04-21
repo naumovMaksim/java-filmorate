@@ -16,7 +16,6 @@ import java.util.HashSet;
 @Component
 @RequiredArgsConstructor
 public class LikesDao implements LikesStorage {
-
     private final JdbcTemplate jdbcTemplate;
 
     @Override
@@ -24,7 +23,7 @@ public class LikesDao implements LikesStorage {
         String sql = "SELECT u.user_ID, u.email, u.login, u.name, u.birthday " +
                 "FROM FILM_LIKES AS fl" +
                 "LEFT JOIN USERS AS u ON flLEFT.USER_ID = u.USER_ID " +
-                "WHERE FILM_ID = ?";
+                "WHERE FILM_ID = ?" ;
         return jdbcTemplate.query(sql, (rs, rowNum) -> User.makeUser(rs), id);
     }
 
@@ -33,7 +32,7 @@ public class LikesDao implements LikesStorage {
         String sql = "SELECT u.user_ID, u.email, u.login, u.name, u.birthday " +
                 "FROM FILM_LIKES AS fl" +
                 "LEFT JOIN USERS AS u ON flLEFT.USER_ID = u.USER_ID " +
-                "WHERE FILM_ID = ?";
+                "WHERE FILM_ID = ?" ;
         Collection<User> usersLikes = jdbcTemplate.query(sql, (rs, rowNum) -> User.makeUser(rs), id);
         HashSet<Integer> setLikes = new HashSet<>();
         for (User user : usersLikes) {
@@ -44,7 +43,7 @@ public class LikesDao implements LikesStorage {
 
     @Override
     public void likeFilm(int filmId, int userId) {
-        String sql = "INSERT INTO FILM_LIKES (FILM_ID, USER_ID) VALUES (?,?)";
+        String sql = "INSERT INTO FILM_LIKES (FILM_ID, USER_ID) VALUES (?,?)" ;
 
         try {
             jdbcTemplate.update(sql, filmId, userId);
@@ -57,7 +56,7 @@ public class LikesDao implements LikesStorage {
 
     @Override
     public void deleteLike(int filmId, int userId) {
-        String sql = "DELETE FROM FILM_LIKES WHERE FILM_ID = ? AND USER_ID = ?";
+        String sql = "DELETE FROM FILM_LIKES WHERE FILM_ID = ? AND USER_ID = ?" ;
 
         try {
             jdbcTemplate.update(sql, filmId, userId);
