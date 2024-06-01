@@ -5,7 +5,7 @@
 
 Версия языка: 17.
 
-Зависимости: springframework, lombok, zalando, h2database, 
+Зависимости: springframework, lombok, zalando, h2database.
 
 ### Возможности.
 
